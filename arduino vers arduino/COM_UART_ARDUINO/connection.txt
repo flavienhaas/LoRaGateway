@@ -1,0 +1,5 @@
+Genuino Zero (RX) pin 0 ---------------- Arduino Uno pin 11
+
+Genuino Zero (TX) pin1 ---------------- Arduino Uno pin 10
+
+Ground ---------------------------------- Ground
