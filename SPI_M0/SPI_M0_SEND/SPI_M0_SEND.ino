@@ -1,18 +1,24 @@
-#include<SPI.h>
+#include <SPI.h>
+#include "wiring_private.h" // pinPeripheral() function
 
-//SPIClass maSPI (&PERIPH_SPI,  PIN_SPI_MISO,  PIN_SPI_SCK,  PIN_SPI_MOSI,  PAD_SPI_TX,  PAD_SPI_RX);
-
+SPIClass mySPI (&sercom2, 3, 5, 4, SPI_PAD_0_SCK_3, SERCOM_RX_PAD_1);
 
 void setup() {
-  // put your setup code here, to run once:
-SPI.begin();
-SerialUSB.begin(9600);
+  Serial.begin(115200);
+
+  // do this first, for Reasons
+  mySPI.begin();
+
+  // Assign pins 3, 4, 5 to SERCOM & SERCOM_ALT
+  pinPeripheral(3, PIO_SERCOM_ALT);
+  pinPeripheral(4, PIO_SERCOM_ALT);
+  pinPeripheral(5, PIO_SERCOM);
 }
 
+uint8_t i=0;
 void loop() {
-  // put your main code here, to run repeatedly:
-SerialUSB.println("hello");
-delay(1000);
-SPI.transfer(0x07);
-
+  Serial.println(i);
+  mySPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
+  mySPI.transfer(i++);
+  mySPI.endTransaction();
 }
