@@ -7,7 +7,7 @@ void setup() {
 
   Serial.println("LoRa Receiver");
 
-  if (!LoRa.begin(915E6)) {
+  if (!LoRa.begin(868E6)) {
     Serial.println("Starting LoRa failed!");
     while (1);
   }
@@ -17,9 +17,6 @@ void loop() {
   // try to parse packet
   int packetSize = LoRa.parsePacket();
   if (packetSize) {
-    // received a packet
-    //Serial.print("Received packet '");
-
     // read packet
     while (LoRa.available()) {
       Serial.print((char)LoRa.read());

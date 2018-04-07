@@ -10,7 +10,7 @@ void setup() {
 
   Serial.println("LoRa Sender");
 
-  if (!LoRa.begin(915E6)) {
+  if (!LoRa.begin(868E6)) {
     Serial.println("Starting LoRa failed!");
     while (1);
   }
@@ -29,5 +29,5 @@ void loop() {
 
   counter++;
 
-  delay(1000);
+  delay(5000);
 }
