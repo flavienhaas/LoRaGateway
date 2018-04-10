@@ -17,10 +17,9 @@ void setup() {
 
 uint8_t i=0;
 void loop() {
-  SerialUSB.println(i);
+  SerialUSB.println("je SPI");
   mySPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
-  mySPI.transfer(i++);
-  mySPI.transfer(7);
+  mySPI.transfer(1);
   mySPI.endTransaction();
   delay(100);
 }

@@ -18,7 +18,8 @@ void setup() {
 uint8_t i=0;
 void loop() {
   mySPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
-  int recu = mySPI.transfer(i++);
+  int recu = 0;
+  recu = mySPI.transfer(2);
   SerialUSB.println(recu);
   mySPI.endTransaction();
   delay(100);
