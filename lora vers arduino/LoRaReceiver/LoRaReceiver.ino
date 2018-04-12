@@ -2,28 +2,27 @@
 #include <LoRa.h>
 
 void setup() {
-  Serial.begin(9600);
-  while (!Serial);
+  SerialUSB.begin(9600);
+  while (!SerialUSB){};
+  SerialUSB.println("LoRa Receiver");
 
-  Serial.println("LoRa Receiver");
-
-  if (!LoRa.begin(868E6)) {
-    Serial.println("Starting LoRa failed!");
-    while (1);
-  }
+  //if (!LoRa.begin(868E6)) {
+  //  Serial.println("Starting LoRa failed!");
+  //  while (1);
+  //}
 }
 
 void loop() {
-  // try to parse packet
   int packetSize = LoRa.parsePacket();
-  if (packetSize) {
-    // read packet
-    while (LoRa.available()) {
-      Serial.print((char)LoRa.read());
+  if (packetSize > 0) {
+    for (int i = 0; i < packetSize; i++)
+    {
+      SerialUSB.println((char)LoRa.read());
     }
 
-    // print RSSI of packet
-    //Serial.print("' with RSS
+    //Serial.print("with RSSi");
     //Serial.println(LoRa.packetRssi());
+    delay(100);
   }
+  
 }

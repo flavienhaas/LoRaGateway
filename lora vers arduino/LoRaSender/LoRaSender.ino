@@ -5,20 +5,20 @@ int counter = 0;
 char mes[] = "message :";
 
 void setup() {
-  Serial.begin(9600);
+  SerialUSB.begin(9600);
   while (!Serial);
 
-  Serial.println("LoRa Sender");
+  SerialUSB.println("LoRa Sender");
 
   if (!LoRa.begin(868E6)) {
-    Serial.println("Starting LoRa failed!");
+    SerialUSB.println("Starting LoRa failed!");
     while (1);
   }
 }
 
 void loop() {
-  Serial.print("paquet envoyé : ");
-  Serial.println(counter);
+  SerialUSB.print("paquet envoyé : ");
+  SerialUSB.println(counter);
 
   // send packet
   LoRa.beginPacket();
