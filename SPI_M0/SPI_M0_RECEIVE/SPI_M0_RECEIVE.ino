@@ -5,9 +5,7 @@ SPIClass mySPI (&sercom2, 3, 5, 4, SPI_PAD_0_SCK_3, SERCOM_RX_PAD_1); //digital 
 
 void setup() {
   SerialUSB.begin(9600);
-
-  // do this first, for Reasons
-  mySPI.begin();
+  mySPI.begin(); //initiate the SPI communicaton
 
   // Assign pins 3, 4, 5 to SERCOM & SERCOM_ALT
   pinPeripheral(3, PIO_SERCOM_ALT);
@@ -18,8 +16,8 @@ void setup() {
 uint8_t i=0;
 void loop() {
   mySPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
-  int recu = 0;
-  recu = mySPI.transfer(2);
+  int recu = 0; //create recu
+  recu = mySPI.transfer(2); //send and recieve using spi
   SerialUSB.println(recu);
   mySPI.endTransaction();
   delay(100);
