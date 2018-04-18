@@ -1,7 +1,12 @@
 #include <SPI.h>
+#include <LoRa.h>
 #include "Ethernet.h"
+#include "util.h" // pour avoir l'affichage du temps écoulé
 
+#define LENMAX 80 // taille maximale acceptée pour la trame
 #define Serial SerialUSB
+
+// void setSPIFrequency(uint32_t frequency); // 8MHz par défaut c'est bq pour l'analyseur logique
 
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
@@ -15,24 +20,57 @@ IPAddress ip(10, 0, 0, 49);
 // (port 80 is default for HTTP):
 EthernetServer server(80);
 
-void setup() {
-  // Open serial communications and wait for port to open:
+void setup(){
   Serial.begin(9600);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
+  while (!Serial);
+  Serial.print("Recepteur LoRa\n");
+  // initialiser le shield LoRa en 868 MHz
+  if( !LoRa.begin(868E6) ){
+    Serial.print("Echec de l'initialisation LoRa !\n");
+    while(true); // on se bloque ici et on ne va pas plus loin
   }
-
-
-  // start the Ethernet connection and the server:
   Ethernet.begin(mac, ip);
   server.begin();
   Serial.print("server is at ");
   Serial.println(Ethernet.localIP());
 }
 
-
 void loop() {
-  // listen for incoming clients
+    static byte tampon[LENMAX]={0};
+    int longueurTrame;
+    // si le module a reçu une trame alors sa longueur sera non nulle
+    longueurTrame=LoRa.parsePacket();
+    if( longueurTrame > 0 ){
+        //---- copie de la trame depuis le modem vers le tampon ----
+        if( longueurTrame>LENMAX ){
+            Serial.print("Trame reçue est trop grande pour le tampon : ");
+            Serial.println(longueurTrame);
+            longueurTrame=LENMAX; // troncature
+        }
+        for( int i=0; i<longueurTrame; i++ ){
+            tampon[i]=(byte)LoRa.read();
+        }
+        //---- affichage de l'heure d'arrivée ----
+        SerialPrintElapsedTime();
+        //---- affichage en hexadécimal ----
+        Serial.print("0x");
+        for( int i=0; i<longueurTrame; i++ ){
+            if( tampon[i] < 0x0F ) Serial.print("0");
+            Serial.print( tampon[i], HEX );
+        }
+        //---- affichage en ASCII ----
+        Serial.print( " " );
+        for( int i=0; i<longueurTrame; i++ ){
+            if( (tampon[i] < 0x20)||(tampon[i] > 0x7E) ){
+                Serial.print( "."); // ce caractère est non imprimable
+            }else{
+                Serial.print( (char)tampon[i] );
+            }
+        }
+        Serial.print( "\n" );
+    }//if LoRa.parsePacket
+    delay(10);
+      // listen for incoming clients
   EthernetClient client = server.available();
   if (client) {
     Serial.println("new client");
@@ -82,4 +120,6 @@ void loop() {
     Serial.println("client disconnected");
   }
 }
+
+
 
