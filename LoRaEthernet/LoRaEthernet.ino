@@ -1,35 +1,33 @@
-#include <SPI.h>
-#include <LoRa.h>
-#include "Ethernet.h"
-#include "util.h" // pour avoir l'affichage du temps écoulé
+// Flavien HAAS, 2018
+// to compile as on the diagrams, check that you have changed the SS port as indicated on the README
 
-#define LENMAX 80 // taille maximale acceptée pour la trame
-#define Serial SerialUSB
+#include <SPI.h>              // to communicate using spi (required for our shields)
+#include <LoRa.h>             // to use the LoRa shield
+#include "Ethernet.h"         // to use the ethernet shield
+#include "util.h"             // to have the display of the elapsed time
 
-// void setSPIFrequency(uint32_t frequency); // 8MHz par défaut c'est bq pour l'analyseur logique
+#define LENMAX 80             // maximum size for the LoRa frame
+#define Serial SerialUSB      // serial out on the M0 use a different function
 
-// Enter a MAC address and IP address for your controller below.
-// The IP address will be dependent on your local network:
-byte mac[] = {
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
-};
-IPAddress ip(10, 0, 0, 49);
+// void setSPIFrequency(uint32_t frequency);            // set the SPI at 8MHz to use logic analyser
 
-// Initialize the Ethernet server library
-// with the IP address and port you want to use
-// (port 80 is default for HTTP):
-EthernetServer server(80);
+byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};      // set the mac address
+
+//IPAddress ip(10, 0, 0, 49);                           //set the IP address for the ethernet shield, overwise the librairy use DHCP
+
+EthernetServer server(80);                              // initialize the EthernetServer library, using port 80 (default fot HTTP)
 
 void setup(){
   Serial.begin(9600);
-  while (!Serial);
-  Serial.print("Recepteur LoRa\n");
-  // initialiser le shield LoRa en 868 MHz
+  while (!Serial);                                      // wait for serial to initialize
+  Serial.print("Passerelle LoRa\n");                    // display on serial the name of the device
+
   if( !LoRa.begin(868E6) ){
     Serial.print("Echec de l'initialisation LoRa !\n");
-    while(true); // on se bloque ici et on ne va pas plus loin
-  }
-  Ethernet.begin(mac, ip);
+    while(true);}                                       // initialize LoRa shield LoRa at 868 MHz
+
+  //Ethernet.begin(mac, ip);                            // initialize Ethernet shield using the set mac adress and set IP
+  Ethernet.begin(mac);                                  // initialize Ethernet shield uding the set mac and DHCP for the IP
   server.begin();
   Serial.print("server is at ");
   Serial.println(Ethernet.localIP());
@@ -120,6 +118,3 @@ void loop() {
     Serial.println("client disconnected");
   }
 }
-
-
-
