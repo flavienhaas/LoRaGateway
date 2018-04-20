@@ -43,49 +43,49 @@ void SerialPrintElapsedTime( boolean espaceFinal=true ){    // to display the el
 
 void loop() {
 // LoRa receiver
-    static byte tampon[LENMAX]={0};                          // if the module receive a frame, it willnot be null
+    static byte tampon[LENMAX]={0};                         // if the module receive a frame, it willnot be null
     int longueurTrame;
     longueurTrame=LoRa.parsePacket();
     if( longueurTrame > 0 ){
-        if( longueurTrame>LENMAX ){                          // copy of the frame to cache (LENMAX) and verify if the frame is to big
+        if( longueurTrame>LENMAX ){                         // copy of the frame to cache (LENMAX) and verify if the frame is to big
             Serial.print("Trame reçue trop grande : ");
             Serial.println(longueurTrame);
-            longueurTrame=LENMAX;                            // troncature
+            longueurTrame=LENMAX;                           // cut the frame to LENMAX size
         }
         for( int i=0; i<longueurTrame; i++ ){
             tampon[i]=(byte)LoRa.read();
         }
-        SerialPrintElapsedTime();                            // diplay the time the frame arrived
+        SerialPrintElapsedTime();                           // diplay the time the frame arrived
         Serial.print("0x");
-        for( int i=0; i<longueurTrame; i++ ){                // display the frame in hexadecimal
+        for( int i=0; i<longueurTrame; i++ ){               // display the frame in hexadecimal
             if( tampon[i] < 0x0F ) Serial.print("0");
             Serial.print( tampon[i], HEX );
         }
         Serial.print( " " );
         for( int i=0; i<longueurTrame; i++ ){
             if( (tampon[i] < 0x20)||(tampon[i] > 0x7E) ){
-                Serial.print( ".");                          // this character isn't printable (displayable)
+                Serial.print( ".");                         // this character isn't printable (displayable)
             }else{
-                Serial.print( (char)tampon[i] );             // display the frame in ASCII
+                Serial.print( (char)tampon[i] );            // display the frame in ASCII
             }
         }
         Serial.print( "\n" );
-    }                                                        // end of if LoRa.parsePacket
+    }                                                       // end of if LoRa.parsePacket
     delay(10);
 // WebServer
-  EthernetClient client = server.available();                // WebServer :listen for incoming clients
+  EthernetClient client = server.available();               // WebServer :listen for incoming clients
   if (client) {
     Serial.println("new client");
-    boolean currentLineIsBlank = true;                       // an http request ends with a blank line
+    boolean currentLineIsBlank = true;                      // an http request ends with a blank line
     while (client.connected()) {
       if (client.available()) {
         char c = client.read();
         Serial.write(c);
-        if (c == '\n' && currentLineIsBlank) {               // send the beginning of a standard http response header
+        if (c == '\n' && currentLineIsBlank) {              // send the beginning of a standard http response header
           client.println("HTTP/1.1 200 OK");
           client.println("Content-Type: text/html");
-          client.println("Connection: close");               // the connection will be closed after completion of the response
-          client.println("Refresh: 5");                      // refresh the page automatically every 5 sec
+          client.println("Connection: close");              // the connection will be closed after completion of the response
+          client.println("Refresh: 5");                     // refresh the page automatically every 5 sec
           client.println();
           client.println("<!DOCTYPE HTML>");
           client.println("<html>");
@@ -101,14 +101,14 @@ void loop() {
           client.println("</html>");
           break;
         }
-        if (c == '\n') {                                     // send a new blank line to indicate the end of the connection
+        if (c == '\n') {                                    // send a new blank line to indicate the end of the connection
           currentLineIsBlank = true;
         } else if (c != '\r') {
           currentLineIsBlank = false;
         }
       }
     }
-    delay(1);                                                // give the web browser time to receive the data
-    client.stop();                                           // close the connection of the webserver
+    delay(1);                                               // give the web browser time to receive the data
+    client.stop();                                          // close the connection of the webserver
   }
 }
