@@ -32,14 +32,14 @@ void setup(){
   Serial.println(Ethernet.localIP());
 }
 
-void SerialPrintElapsedTime( boolean espaceFinal=true ){    // to display the elapsed time
-  unsigned long h,m,s = millis()/1000;
-  m=s/60;
-  h=m/60;
-  s=s-(m*60);
-  m=m-(h*60);
-  Serial << ((h<10)?"0":"") << h << ":" << ((m<10)?"0":"") << m << ":" << ((s<10)?"0":"") << s << (espaceFinal?" ":"");
-}
+//void SerialPrintElapsedTime( boolean espaceFinal=true ){    // to display the elapsed time
+//  unsigned long h,m,s = millis()/1000;
+//  m=s/60;
+//  h=m/60;
+//  s=s-(m*60);
+//  m=m-(h*60);
+//  Serial << ((h<10)?"0":"") << h << ":" << ((m<10)?"0":"") << m << ":" << ((s<10)?"0":"") << s << (espaceFinal?" ":"");
+//}
 
 void loop() {
 // LoRa receiver
@@ -55,7 +55,7 @@ void loop() {
         for( int i=0; i<longueurTrame; i++ ){
             tampon[i]=(byte)LoRa.read();
         }
-        SerialPrintElapsedTime();                           // diplay the time the frame arrived
+//        SerialPrintElapsedTime();                           // diplay the time the frame arrived
         Serial.print("0x");
         for( int i=0; i<longueurTrame; i++ ){               // display the frame in hexadecimal
             if( tampon[i] < 0x0F ) Serial.print("0");
