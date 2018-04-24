@@ -1,5 +1,5 @@
 // Flavien HAAS, 2018
-// before transfert, check that you have changed the SS port as indicated on the README or you will not be  able to use the LoRa shield as the same time as the Ethernet shield
+// before transfert, check that you have changed the SS port as indicated on the README or you will not be able to use the LoRa shield as the same time as the Ethernet shield
 
 #include <SPI.h>                                            // to communicate using spi (required for our shields)
 #include <LoRa.h>                                           // to use the LoRa shield
@@ -24,8 +24,6 @@ struct message {                                            // frame structure
   uint16_t D2;                                              // DATA 2
   uint16_t D3;                                              // DATA 3
 };
-
-
 
 void setup(){
   Serial.begin(9600);
