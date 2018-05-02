@@ -1,20 +1,24 @@
 #include <SPI.h>
 #include <LoRa.h> // si ce n'est déjà fait, importez la librairie LoRa via le gestionnaire de bibliothèque
 
-struct message {                                            // frame structure
+#define Serial SerialUSB
+
+typedef struct paquet_LoRa {                                // frame structure
   uint16_t ID;                                              // ID
   uint16_t TS;                                              // TimeStamp
   uint16_t DT;                                              // Data Type
   uint16_t D1;                                              // DATA 1
   uint16_t D2;                                              // DATA 2
   uint16_t D3;                                              // DATA 3
-};
+} trame;
+
+trame message;
 
 void setup(){
   Serial.begin(9600);
   while (!Serial);
   Serial.println("fakeLoRastation");
- // LoRa.setSPIFrequency(4E6); //défaut 8MHz trop rapide pour l'analyseur
+ // LoRa.setSPIFrequency(4E6);                              //défaut 8MHz trop rapide pour l'analyseur
   if( !LoRa.begin(868E6) ){ 
     Serial.print("Echec de l'initialisation LoRa !\n");
     while(true);
@@ -23,8 +27,6 @@ void setup(){
 
 void loop() {
   static byte N=0;
-  static byte 
-  message message = {0};
 
   Serial.print("Envoi du message \"N="); Serial.print(N); Serial.println("\"");
   message.ID = 0x30; // n° d'identification de l'émetteur
@@ -35,7 +37,7 @@ void loop() {
   message.D3 = '0'+ (N/1  )%10;
   
   LoRa.beginPacket(false);
-  LoRa.write( (uint8_t*)&message, sizeof(message));
+  LoRa.write( (uint8_t*)&message, sizeof(message));          //envoi de la structure message et de sa taille
   LoRa.endPacket();
-  delay(5000);
+  delay(3000);
 }//loop()
