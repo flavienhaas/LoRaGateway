@@ -5,4 +5,6 @@ Gateway between a weather MicroStation using LoRa modulation and a web server. T
 ## Attention !
 Because we're using two arduino shields using SPI communication, we need to select a chip select for each shield. I decided to use D11 for the Ethernet shield (10 for the LoRa, 4 for the SD).
 
-To do this, edit w5100.h in the default ethernet librairy in the installation folder of your arduino IDE (on windows, in administrator mode ‪C:\Program Files (x86)\Arduino\libraries\Ethernet\src\utility\w5100.h).
+To do this, edit w5100.h in the default ethernet librairy in the installation folder of your arduino IDE (on windows, in administrator mode ‪C:\Program Files (x86)\Arduino\libraries\Ethernet\src\utility\w5100.h)
+
+On this case, you need to change this line ``` #define ETHERNET_SHIELD_SPI_CS 10 ``` to ``` #define ETHERNET_SHIELD_SPI_CS 11 ```
