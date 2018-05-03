@@ -1,10 +1,16 @@
 #include <SPI.h>
 #include <LoRa.h>
 #include <String.h>
+#include "Ethernet.h"
 
 //correspond au modele de la trame
 //la station est définie sur 1 octet (poid faible)
 #define MAX_STATION 0x03 
+
+#define Serial SerialUSB
+
+byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};          // set the mac address
+
 uint16_t temp_IS=0;
 uint16_t temp_H=0;
 bool res;
@@ -25,8 +31,10 @@ trame tab_trames[MAX_STATION]; //tableau des trames par micro-statiton
 void setup() 
 {
   Serial.begin(9600);
-  Serial1.begin(9600);
+  Ethernet.begin(mac);
   Serial.println("Passerelle LoRa :");
+  Serial.print("server is at ");                            // display on serial the IP you can find the webpage
+  Serial.println(Ethernet.localIP());
 
 //on démarre une instance de LoRa avec en parametre une fréquence et on bloque si on ne peux pas se connecter
   do
@@ -138,7 +146,6 @@ void envoyer_trame(uint8_t IS)
   en_tete.concat(" HTTP/1.0\r\nHost: btslimayrac.ovh\r\nConnection: close\r\n\f");
   
   Serial.println("On envoie une en-tete :");
-  Serial1.println(en_tete);
   Serial.println(en_tete);
 //en_tete.toCharArray(afficher_en_tete,200);
   //Serial.write(afficher_en_tete, 200);
