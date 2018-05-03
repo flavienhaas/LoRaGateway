@@ -17,12 +17,12 @@ byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};          // set the mac addre
 EthernetServer server(80);                                  // initialize the EthernetServer library, using port 80 (default fot HTTP)
 
 typedef struct paquet_LoRa {                                // frame structure
-  uint16_t ID;                                              // ID
-  uint16_t TS;                                              // TimeStamp
-  uint16_t DT;                                              // Data Type
-  uint16_t D1;                                              // DATA 1
-  uint16_t D2;                                              // DATA 2
-  uint16_t D3;                                              // DATA 3
+  uint16_t ID = 1025;                                       // ID
+  uint16_t TS = 0;                                          // TimeStamp
+  uint16_t DT = 0;                                          // Data Type
+  uint16_t D1 = 0;                                          // DATA 1
+  uint16_t D2 = 0;                                          // DATA 2
+  uint16_t D3 = 0;                                          // DATA 3
 } trame;
 
 trame message;
@@ -54,9 +54,17 @@ void setup(){
 
 void loop() {
 // LoRa receiver
+String strID = String(message.ID);//0x00
+String strTS =  String(message.TS);//0x0000
+String strDT =  String(message.DT);//0x0000
+String strD1 =  String(message.D1);//0x0000
+String strD2 =  String(message.D3);//0x0000
+String strD3 =  String(message.D3);//0x0000
+
+
     static byte tampon[LENMAX]={0};                         // if the module receive a frame, it willnot be null
     int longueurTrame;
-    longueurTrame=LoRa.parsePacket();
+    longueurTrame=LoRa.parsePacket(sizeof(message));
     if( longueurTrame > 0 ){
         if( longueurTrame>LENMAX ){                         // copy of the frame to cache (LENMAX) and verify if the frame is to big
             Serial.print("Trame reçue trop grande : ");
@@ -77,12 +85,28 @@ void loop() {
             if( (tampon[i] < 0x20)||(tampon[i] > 0x7E) ){
                 Serial.print( ".");                         // this character isn't printable (displayable)
             }else{
-                Serial.print( (char)tampon[i] );            // display the frame in ASCII
+                //Serial.print( (char)tampon[i] );
+                // display the frame in ASCII
+                //Serial.println("\nTaille du pacquet reçu en octets: "+taillepaquet);
+    Serial.println("ID Passerelle et station reçus : "+strID);
+    Serial.println("Timestamp reçue : "+strTS);
+    Serial.println("Type de données reçus : "+strDT);
+    Serial.println("Champ de données 1 reçus : "+strD1);
+    Serial.println("Champ de données 2 reçus : "+strD2);
+    Serial.println("Champ de données 3 reçus : "+strD3);
+                
             }
         }
         Serial.print( "\n" );
     }                                                       // end of if LoRa.parsePacket
     delay(10);
+
+// Lora receiver 
+
+
+
+
+    
 // WebServer
   EthernetClient client = server.available();               // WebServer :listen for incoming clients
   if (client) {
