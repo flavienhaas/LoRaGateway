@@ -54,12 +54,12 @@ void setup(){
 
 void loop() {
 // LoRa receiver
-String strID = String(message.ID);//0x00
-String strTS =  String(message.TS);//0x0000
-String strDT =  String(message.DT);//0x0000
-String strD1 =  String(message.D1);//0x0000
-String strD2 =  String(message.D3);//0x0000
-String strD3 =  String(message.D3);//0x0000
+    String strID =  String(message.ID);//0x00
+    String strTS =  String(message.TS);//0x0000
+    String strDT =  String(message.DT);//0x0000
+    String strD1 =  String(message.D1);//0x0000
+    String strD2 =  String(message.D3);//0x0000
+    String strD3 =  String(message.D3);//0x0000
 
 
     static byte tampon[LENMAX]={0};                         // if the module receive a frame, it willnot be null
@@ -84,28 +84,21 @@ String strD3 =  String(message.D3);//0x0000
         for( int i=0; i<longueurTrame; i++ ){
             if( (tampon[i] < 0x20)||(tampon[i] > 0x7E) ){
                 Serial.print( ".");                         // this character isn't printable (displayable)
-            }else{
-                //Serial.print( (char)tampon[i] );
-                // display the frame in ASCII
-                //Serial.println("\nTaille du pacquet reçu en octets: "+taillepaquet);
-    Serial.println("ID Passerelle et station reçus : "+strID);
-    Serial.println("Timestamp reçue : "+strTS);
-    Serial.println("Type de données reçus : "+strDT);
-    Serial.println("Champ de données 1 reçus : "+strD1);
-    Serial.println("Champ de données 2 reçus : "+strD2);
-    Serial.println("Champ de données 3 reçus : "+strD3);
-                
+            }
+            else{
+                Serial.print( (char)tampon[i] );            // display the frame in ASCII
+                Serial.println("\nTaille du pacquet reçu en octets: "+LENMAX);
+                Serial.println("ID Passerelle et station reçus : "+strID);
+                Serial.println("Timestamp reçue : "+strTS);
+                Serial.println("Type de données reçus : "+strDT);
+                Serial.println("Champ de données 1 reçus : "+strD1);
+                Serial.println("Champ de données 2 reçus : "+strD2);
+                Serial.println("Champ de données 3 reçus : "+strD3);
             }
         }
         Serial.print( "\n" );
     }                                                       // end of if LoRa.parsePacket
     delay(10);
-
-// Lora receiver 
-
-
-
-
     
 // WebServer
   EthernetClient client = server.available();               // WebServer :listen for incoming clients

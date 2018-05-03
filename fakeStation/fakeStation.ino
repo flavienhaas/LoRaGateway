@@ -1,55 +1,53 @@
-#include <SPI.h>
 #include <LoRa.h>
 
 #define Serial SerialUSB
 
-typedef struct paquet_LoRa {                                // frame structure
-  uint16_t ID = 1025;                                              // ID
-  uint16_t TS = 0;                                              // TimeStamp
-  uint16_t DT = 0;                                              // Data Type
-  uint16_t D1 = 0;                                              // DATA 1
-  uint16_t D2 = 0;                                              // DATA 2
-  uint16_t D3 = 0;                                              // DATA 3
-} trame;
+uint16_t temp ;
+uint16_t hum ;
+uint16_t pluie ;
+uint16_t IDSTATION;
+uint16_t IDMESSAGE;
 
-trame message;
+#define DelaiEntreMessages 1 // en minutes. Pour 140 messages par jour mettre 11 minutes (10,28 si c'est possible)
 
-void setup(){
+
+void setup()
+{
   Serial.begin(9600);
-  while (!Serial);
-  Serial.println("fakeLoRastation");
- // LoRa.setSPIFrequency(4E6);                              //défaut 8MHz trop rapide pour l'analyseur
-  if( !LoRa.begin(868E6) ){ 
-    Serial.print("Echec de l'initialisation LoRa !\n");
-    while(true);
+  Serial.println("LoRa Sender");
+
+  if (!LoRa.begin(868E6)) { // Démarrage du LoRa avec une fréquence de 868MHz, si il n'y a pas de retour
+    Serial.println("Erreur du demarrage du LoRa!"); // on écrit un message d'erreur
+    while (true);
   }
-}//setup()
+  else {
+    delay(2000);
+    Serial.println("RaLo OK");
+  }
+  IDSTATION = 1; // Lecture de l'id 
+}
 
 void loop() {
-  int c=0;
-  message.D1=random(0,65535);
-  message.D2=random(0,65535);
-  message.D3=random(0,65535);
 
-  String strID = String(message.ID);//0x00
-  String strTS =  String(message.TS);//0x0000
-  String strDT =  String(message.DT);//0x0000
-  String strD1 =  String(message.D1);//0x0000
-  String strD2 =  String(message.D3);//0x0000
-  String strD3 =  String(message.D3);//0x0000
+  static uint32_t prochainEnvoie = millis() + 0; // permet d'envoyer tout de suite
+ /* static long prochainCrLf = 0;
 
-  for(c=0;c<3;c++){
-  LoRa.beginPacket(false);
-  LoRa.write( (uint8_t*)&message, sizeof(message));
-  Serial.println("\nPacquet envoyé: ");
-  Serial.println("ID Passerelle et station envoyés : "+strID);
-  Serial.println("Timestamp envoyée: "+strTS);
-  Serial.println("Type de données envoyé: "+strDT);
-  Serial.println("Champ de données 1 envoyé: "+strD1);
-  Serial.println("Champ de données 2 envoyé: "+strD2);
-  Serial.println("Champ de données 3 envoyé: "+strD3);
-  LoRa.endPacket();
-  delay(1000);
-  }//findufor
-  message.TS = message.TS + 1;
-}//loop()
+  if ( ++prochainCrLf > 80 )
+  {
+    prochainCrLf = 0;
+  }
+*/
+  if ( millis() > prochainEnvoie ) {
+    prochainEnvoie = millis() + ((uint32_t)DelaiEntreMessages * (uint32_t)60 * (uint32_t)1000); // prochain envoie dans dix minutes
+    Serial.print("\n\rEn procedure de travail a "); Serial.print( millis()); Serial.print(" next a "); Serial.println(prochainEnvoie);
+    delay(200);
+
+    temp = LireTemperature();
+    hum = LireHumidite();
+    pluie = LirePluie();
+    delay(1000);
+    RadioEnvoyer(IDSTATION, IDMESSAGE, temp, hum, pluie);
+    delay(1000);
+  }
+}
+
