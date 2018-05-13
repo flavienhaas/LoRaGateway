@@ -1,3 +1,4 @@
+
 #include <LoRa.h>
 
 #define Serial SerialUSB
@@ -46,7 +47,9 @@ void loop() {
     hum = LireHumidite();
     pluie = LirePluie();
     delay(1000);
-    RadioEnvoyer(IDSTATION, IDMESSAGE, temp, hum, pluie);
+    LoRa.beginPacket();
+    LoRa.print("0107770002004000C8");
+    LoRa.endPacket();
     delay(1000);
   }
 }
