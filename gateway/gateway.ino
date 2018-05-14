@@ -38,7 +38,7 @@ void setup(){
 
   //Ethernet.begin(mac, ip);                                // initialize Ethernet shield using the set mac adress and set IP
   Ethernet.begin(mac);                                      // initialize Ethernet shield uding the set mac and DHCP for the IP
-  server.begin();                                           // initialize WebServer part of the librairy
+  Server.begin();                                           // initialize WebServer part of the librairy
   Serial.print("server is at ");                            // display on serial the IP you can find the webpage
   Serial.println(Ethernet.localIP());
 }

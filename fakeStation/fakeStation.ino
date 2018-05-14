@@ -1,7 +1,5 @@
-
 #include <LoRa.h>
-
-#define Serial SerialUSB
+//#include <EEPROM.h>
 
 uint16_t temp ;
 uint16_t hum ;
@@ -11,9 +9,9 @@ uint16_t IDMESSAGE;
 
 #define DelaiEntreMessages 1 // en minutes. Pour 140 messages par jour mettre 11 minutes (10,28 si c'est possible)
 
-
 void setup()
 {
+  //Wire.begin();
   Serial.begin(9600);
   Serial.println("LoRa Sender");
 
@@ -25,7 +23,9 @@ void setup()
     delay(2000);
     Serial.println("RaLo OK");
   }
-  IDSTATION = 1; // Lecture de l'id 
+  IDSTATION = 1; // Lecture de l'id de la station écrit dans l'EEPROM
+  //IDMESSAGE = EEPROM.read(4)*256+EEPROM.read(5); // relecture du prochain timestamp à utiliser
+  //IDMESSAGE = 456; 
 }
 
 void loop() {
@@ -47,9 +47,7 @@ void loop() {
     hum = LireHumidite();
     pluie = LirePluie();
     delay(1000);
-    LoRa.beginPacket();
-    LoRa.print("0107770002004000C8");
-    LoRa.endPacket();
+    RadioEnvoyer(IDSTATION, IDMESSAGE, temp, hum, pluie);
     delay(1000);
   }
 }
