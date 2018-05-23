@@ -6,23 +6,23 @@ void setup() {
   while (!SerialUSB){};
   SerialUSB.println("LoRa Receiver");
 
-  //if (!LoRa.begin(868E6)) {
-  //  Serial.println("Starting LoRa failed!");
-  //  while (1);
-  //}
+  if (!LoRa.begin(868E6)) {
+    Serial.println("Starting LoRa failed!");
+    while (1);
+  }
 }
 
 void loop() {
   int packetSize = LoRa.parsePacket();
   if (packetSize > 0) {
-    for (int i = 0; i < packetSize; i++)
+  SerialUSB.println("Nouveau paquet");
+  for (int i = 0; i < packetSize; i++)
     {
-      SerialUSB.println((char)LoRa.read());
+      SerialUSB.println(LoRa.read(),HEX);
     }
-
     //Serial.print("with RSSi");
     //Serial.println(LoRa.packetRssi());
     delay(100);
   }
-  
+  //SerialUSB.println("");
 }

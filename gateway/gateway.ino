@@ -16,16 +16,18 @@ byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};          // set the mac addre
 
 EthernetServer server(80);                                  // initialize the EthernetServer library, using port 80 (default fot HTTP)
 
-typedef struct paquet_LoRa {                                // frame structure
+typedef struct {                                             // frame structure
   uint16_t ID = 1025;                                       // ID
   uint16_t TS = 0;                                          // TimeStamp
   uint16_t DT = 0;                                          // Data Type
   uint16_t D1 = 0;                                          // DATA 1
   uint16_t D2 = 0;                                          // DATA 2
   uint16_t D3 = 0;                                          // DATA 3
-} trame;
+} trame;                                                    // frame name
 
-trame message;
+trame message;                                              // creation of the frame message
+
+uint16_t ID;
 
 void setup(){
   Serial.begin(9600);

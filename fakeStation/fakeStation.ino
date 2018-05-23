@@ -1,54 +1,80 @@
 #include <SPI.h>
 #include <LoRa.h>
 
-typedef struct{                                // frame structure
-  uint16_t ID = 1025;                                       // ID
-  uint16_t TS = 0;                                          // TimeStamp
-  uint16_t DT = 0;                                          // Data Type
-  uint16_t D1 = 0;                                          // DATA 1
-  uint16_t D2 = 0;                                          // DATA 2
-  uint16_t D3 = 0;                                          // DATA 3
-}trame;
+typedef struct
+{
+  uint8_t ids = 0x45;
+  uint8_t idp = 0x00;
+  uint16_t ts = 0x0000;
+  uint16_t dt = 0x0001;
+  uint16_t d1 = 0x0000;
+  uint16_t d2 = 0x0000;
+  uint16_t d3 = 0x0000;
+}message;
 
-trame message;
+message msg;
 
 void setup() {
-  Serial.begin(9600);
+  SerialUSB.begin(9600);
   while (!Serial);
 
-  Serial.println("LoRa Sender");
+  SerialUSB.println("LoRa Sender");
 
-  message.ID = 0x0007;
-  message.TS = 0x0001;
-  message.DT = 0x0001;
-  message.D1 = 0x0026;
-  message.D2 = 0x0003;
-  message.D3 = 0x0004;
-
-  if (!LoRa.begin(868E6)) {
-    Serial.println("Starting LoRa failed!");
-    while (1);
+  if (!LoRa.begin(868E6))
+  {
+    SerialUSB.println("Starting LoRa failed!");
+    while(1);
   }
 }
 
-void loop() {
-  Serial.print("Sending packet: ");
+void loop()
+{
+  msg.ts = msg.ts + 1;
+  msg.d1 = random(20, 40);
+  msg.d2 = random(40, 60);
+  msg.d3 = random(0, 100);
 
-  // send packet
+  SerialUSB.print("ID station : ");
+  SerialUSB.print(msg.ids, DEC);
+  SerialUSB.print(", ");
+  SerialUSB.println(msg.ids, HEX);
+
+  SerialUSB.print("ID passerelle : ");
+  SerialUSB.print(msg.idp, DEC);
+  SerialUSB.print(", ");
+  SerialUSB.println(msg.idp, HEX);
+
+  SerialUSB.print("Numero de message : ");
+  SerialUSB.print(msg.ts, DEC);
+  SerialUSB.print(", ");
+  SerialUSB.println(msg.ts, HEX);
+
+  SerialUSB.print("Type de donne : ");
+  SerialUSB.print(msg.dt, DEC);
+  SerialUSB.print(", ");
+  SerialUSB.println(msg.dt, HEX);
+
+  SerialUSB.print("Donnee 1 : ");
+  SerialUSB.print(msg.d1, DEC);
+  SerialUSB.print(", ");
+  SerialUSB.println(msg.d1, HEX);
+
+  SerialUSB.print("Donnee 2 : ");
+  SerialUSB.print(msg.d2, DEC);
+  SerialUSB.print(", ");
+  SerialUSB.println(msg.d2, HEX);
+
+  SerialUSB.print("Donnee 3 : ");
+  SerialUSB.print(msg.d3, DEC);
+  SerialUSB.print(", ");
+  SerialUSB.println(msg.d3, HEX);
+  SerialUSB.println(" ");
+  
+  SerialUSB.println("Sending packet !");
   LoRa.beginPacket();
-  LoRa.write((uint8_t)(message.ID >> 8));
-  LoRa.write((uint8_t)message.ID);
-  LoRa.write((uint8_t)(message.TS >> 8));
-  LoRa.write((uint8_t)message.TS);
-  LoRa.write((uint8_t)(message.DT >> 8));
-  LoRa.write((uint8_t)message.DT);
-  LoRa.write((uint8_t)(message.D1 >> 8));
-  LoRa.write((uint8_t)message.D1);
-  LoRa.write((uint8_t)(message.D2 >> 8));
-  LoRa.write((uint8_t)message.D2);
-  LoRa.write((uint8_t)(message.D3 >> 8));
-  LoRa.write((uint8_t)message.D3);
+  LoRa.write((uint8_t*)&msg, 12);
   LoRa.endPacket();
 
-  delay(3000);
+  SerialUSB.println("-----------------------------");
+  delay(4000);
 }
