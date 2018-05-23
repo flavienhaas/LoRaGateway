@@ -16,8 +16,9 @@ byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};          // set the mac addre
 
 EthernetServer server(80);                                  // initialize the EthernetServer library, using port 80 (default fot HTTP)
 
-typedef struct {                                             // frame structure
-  uint16_t ID = 1025;                                       // ID
+typedef struct {                                            // frame structure
+  uint8_t ID = 0;                                           // station's ID
+  uint8_t IDp = 0;                                          // gateway's ID
   uint16_t TS = 0;                                          // TimeStamp
   uint16_t DT = 0;                                          // Data Type
   uint16_t D1 = 0;                                          // DATA 1
@@ -27,25 +28,23 @@ typedef struct {                                             // frame structure
 
 trame message;                                              // creation of the frame message
 
-uint16_t ID;
-
 void setup(){
   Serial.begin(9600);
   while (!Serial);                                          // wait for serial to initialize
   Serial.print("Passerelle LoRa\n");                        // display on serial the name of the device
 
-  if( !LoRa.begin(868E6) ){
+  if( !LoRa.begin(868E6) ){                                 // initialise LoRa and display a message if an error occur
     Serial.print("Echec de l'initialisation LoRa !\n");
-    while(true);}                                           // initialize LoRa shield LoRa at 868 MHz
+    while(true);}
 
   //Ethernet.begin(mac, ip);                                // initialize Ethernet shield using the set mac adress and set IP
   Ethernet.begin(mac);                                      // initialize Ethernet shield uding the set mac and DHCP for the IP
-  Server.begin();                                           // initialize WebServer part of the librairy
+  server.begin();                                           // initialize WebServer part of the librairy
   Serial.print("server is at ");                            // display on serial the IP you can find the webpage
   Serial.println(Ethernet.localIP());
 }
 
-//void SerialPrintElapsedTime( boolean espaceFinal=true ){    // to display the elapsed time
+//void SerialPrintElapsedTime( boolean espaceFinal=true ){  // to display the elapsed time
 //  unsigned long h,m,s = millis()/1000;
 //  m=s/60;
 //  h=m/60;
@@ -56,52 +55,43 @@ void setup(){
 
 void loop() {
 // LoRa receiver
-    String strID =  String(message.ID);//0x00
-    String strTS =  String(message.TS);//0x0000
-    String strDT =  String(message.DT);//0x0000
-    String strD1 =  String(message.D1);//0x0000
-    String strD2 =  String(message.D3);//0x0000
-    String strD3 =  String(message.D3);//0x0000
+  int packetSize = LoRa.parsePacket();
+  if (packetSize > 0)
+  {
+    SerialUSB.println("Nouveau paquet");
+    message.ID = LoRa.read();
+    message.IDp = LoRa.read();
+    message.IDp = 0x07;
+    message.TS = ((uint16_t)LoRa.read() | (LoRa.read() << 8));
+    message.DT = ((uint16_t)LoRa.read() | LoRa.read() << 8);
+    message.D1 = ((uint16_t)LoRa.read() | LoRa.read() << 8);
+    message.D2 = ((uint16_t)LoRa.read() | LoRa.read() << 8);
+    message.D3 = ((uint16_t)LoRa.read() | LoRa.read() << 8);
+    SerialUSB.println(message.ID, HEX);
+    SerialUSB.println(message.IDp, HEX);
+    SerialUSB.println(message.TS, HEX);
+    SerialUSB.println(message.DT, HEX);
+    SerialUSB.println(message.D1, HEX);
+    SerialUSB.println(message.D2, HEX);
+    SerialUSB.println(message.D3, HEX);
+    delay(100);
+  }
 
-
-    static byte tampon[LENMAX]={0};                         // if the module receive a frame, it willnot be null
-    int longueurTrame;
-    longueurTrame=LoRa.parsePacket(sizeof(message));
-    if( longueurTrame > 0 ){
-        if( longueurTrame>LENMAX ){                         // copy of the frame to cache (LENMAX) and verify if the frame is to big
-            Serial.print("Trame reçue trop grande : ");
-            Serial.println(longueurTrame);
-            longueurTrame=LENMAX;                           // cut the frame to LENMAX size
-        }
-        for( int i=0; i<longueurTrame; i++ ){
-            tampon[i]=(byte)LoRa.read();
-        }
 //        SerialPrintElapsedTime();                           // diplay the time the frame arrived
-        Serial.print("0x");
-        for( int i=0; i<longueurTrame; i++ ){               // display the frame in hexadecimal
-            if( tampon[i] < 0x0F ) Serial.print("0");
-            Serial.print( tampon[i], HEX );
-        }
-        Serial.print( " " );
-        for( int i=0; i<longueurTrame; i++ ){
-            if( (tampon[i] < 0x20)||(tampon[i] > 0x7E) ){
-                Serial.print( ".");                         // this character isn't printable (displayable)
-            }
-            else{
-                Serial.print( (char)tampon[i] );            // display the frame in ASCII
-                Serial.println("\nTaille du pacquet reçu en octets: "+LENMAX);
-                Serial.println("ID Passerelle et station reçus : "+strID);
-                Serial.println("Timestamp reçue : "+strTS);
-                Serial.println("Type de données reçus : "+strDT);
-                Serial.println("Champ de données 1 reçus : "+strD1);
-                Serial.println("Champ de données 2 reçus : "+strD2);
-                Serial.println("Champ de données 3 reçus : "+strD3);
-            }
-        }
-        Serial.print( "\n" );
-    }                                                       // end of if LoRa.parsePacket
-    delay(10);
-    
+
+// post to server
+  String postdata="&ID="+message.ID+"&IDp="+message.IDp+"&TS="+message.TS+"&DT="+message.DT+"&D1="+message.D1+"&D2="+message.D2+"&D3="+message.D3;
+  bool connected = client.connect(server, 80);
+    if (connected){
+      client.println("POST /formulaireCollecte.html HTTP/1.1");
+      client.println("Host: btslimayrac.ovh");
+      client.println("Cache-Control: no-cache");
+      client.println("Content-Type: application/x-www-form-urlencoded");
+      client.print("Content-Length: ");
+      client.println(postData.length());
+      client.println(postData);
+      }
+
 // WebServer
   EthernetClient client = server.available();               // WebServer :listen for incoming clients
   if (client) {
