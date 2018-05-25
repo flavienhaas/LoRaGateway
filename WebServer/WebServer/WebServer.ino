@@ -2,11 +2,11 @@
 #include <Ethernet.h>
 #include <SD.h>
 
-#define Serial SerialUSB
+//#define Serial SerialUSB
 
 // MAC address from Ethernet shield sticker under board
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress ip(10, 0, 0, 20); // IP address, may need to change depending on network
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0xFD };
+IPAddress ip(10, 0, 0, 50); // IP address, may need to change depending on network
 EthernetServer server(80);  // create a server at port 80
 
 File webFile;
@@ -50,7 +50,7 @@ void loop()
                     client.println("Connection: close");
                     client.println();
                     // send web page
-                    webFile = SD.open("index.html");        // open web page file
+                    webFile = SD.open("index.htm");        // open web page file
                     if (webFile) {
                         while(webFile.available()) {
                             client.write(webFile.read()); // send web page to client

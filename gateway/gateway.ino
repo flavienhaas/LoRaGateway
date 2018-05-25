@@ -8,7 +8,6 @@
 #include <CModemLoRa.h>                                     // to use personalised LoRa class
 #include <CProtocol12Bytes.h>                               // to use our protocol
 
-
 #define LENMAX 80                                           // maximum size for the LoRa frame
 #define Serial SerialUSB                                    // serial out on the M0 use a different function
 
@@ -19,9 +18,9 @@ File webFile;                                               // variable for the 
 
 // void setSPIFrequency(uint32_t frequency);                // set the SPI at 8MHz to use logic analyser
 
-byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0xED};          // set the mac address
+byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0xFD};          // set the mac address
 
-//IPAddress ip(10, 0, 0, 49);                               // set the IP address for the ethernet shield, overwise the librairy use DHCP
+IPAddress ip(192, 1, 1, 150);                               // set the IP address for the ethernet shield, overwise the librairy use DHCP
 
 EthernetServer server(80);                                  // initialize the EthernetServer library, using port 80 (default fot HTTP)
 
