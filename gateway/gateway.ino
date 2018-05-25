@@ -15,9 +15,11 @@
 CModemLoRa thisLoRa;                                        // create object for personnalizeed LoRa class
 CProtocol12Bytes protocol;                                  // create object to store data using our protocol
 
+File webFile;                                               // variable for the file containing the webpage
+
 // void setSPIFrequency(uint32_t frequency);                // set the SPI at 8MHz to use logic analyser
 
-byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};          // set the mac address
+byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0xED};          // set the mac address
 
 //IPAddress ip(10, 0, 0, 49);                               // set the IP address for the ethernet shield, overwise the librairy use DHCP
 
@@ -28,9 +30,7 @@ void setup(){
   while (!Serial);                                          // wait for serial to initialize
   Serial.print("Passerelle LoRa\n");                        // display on serial the name of the device
 
-  if( !LoRa.begin(868E6) ){                                 // initialise LoRa and display a message if an error occur
-    Serial.print("Echec de l'initialisation LoRa !\n");
-    while(true);}
+  thisLoRa.begin();                                         // initialise LoRa
 
   //Ethernet.begin(mac, ip);                                // initialize Ethernet shield using the set mac adress and set IP
   Ethernet.begin(mac);                                      // initialize Ethernet shield uding the set mac and DHCP for the IP
@@ -50,7 +50,7 @@ void setup(){
 
 void loop() {
 // LoRa receiver
-  int packetSize = LoRa.parsePacket();
+  int packetSize = thisLoRa.parsePacket();
   if (packetSize > 0)
   {
     SerialUSB.println("Nouveau paquet");
@@ -70,17 +70,17 @@ void loop() {
 //        SerialPrintElapsedTime();                         // diplay the time the frame arrived
 
 // post to server
-  EthernetClient client;
-  String postdata="&ID="+String(protocol.getStationId())+"&IDp="+String(protocol.getGatewayId())+"&TS="+String(protocol.getTimestampMessage())+"&DT="+String(protocol.getDataType())+"&D1="+String(protocol.getDataOne())+"&D2="+String(protocol.getDataTwo())+"&D3="+String(protocol.getDataThree());
-  bool connected = client.connect(server, 80);
+  EthernetClient postClient;
+  String postdata = "&ID="+String(protocol.getStationId())+"&IDp="+String(protocol.getGatewayId())+"&TS="+String(protocol.getTimestampMessage())+"&DT="+String(protocol.getDataType())+"&D1="+String(protocol.getDataOne())+"&D2="+String(protocol.getDataTwo())+"&D3="+String(protocol.getDataThree());
+  bool connected = postClient.connect("weather.limayrac.ovh", 80);
     if (connected){
-      client.println("POST /formulaireCollecte.html HTTP/1.1");
-      client.println("Host: btslimayrac.ovh");
-      client.println("Cache-Control: no-cache");
-      client.println("Content-Type: application/x-www-form-urlencoded");
-      client.print("Content-Length: ");
-      client.println(postData.length());
-      client.println(postData);
+      postClient.println("POST /formulaireCollecte.html HTTP/1.1");
+      postClient.println("Host: btslimayrac.ovh");
+      postClient.println("Cache-Control: no-cache");
+      postClient.println("Content-Type: application/x-www-form-urlencoded");
+      postClient.print("Content-Length: ");
+      //postClient.println(postData.length());
+      //postClient.println(postData);
       }
 
 // WebServer
@@ -88,22 +88,22 @@ void loop() {
 
     if (serverGateway) {                                    // got client?
         boolean currentLineIsBlank = true;
-        while (client.connected()) {
-            if (client.available()) {                       // client data available to read
-                char c = client.read();                     // read 1 byte (character) from client
+        while (serverGateway.connected()) {
+            if (serverGateway.available()) {                       // client data available to read
+                char c = serverGateway.read();                     // read 1 byte (character) from client
                                                             // last line of client request is blank and ends with \n
                                                             // respond to client only after last line received
                 if (c == '\n' && currentLineIsBlank) {
                                                             // send a standard http response header
-                    client.println("HTTP/1.1 200 OK");
-                    client.println("Content-Type: text/html");
-                    client.println("Connection: close");
-                    client.println();
+                    serverGateway.println("HTTP/1.1 200 OK");
+                    serverGateway.println("Content-Type: text/html");
+                    serverGateway.println("Connection: close");
+                    serverGateway.println();
                     // send web page
                     webFile = SD.open("index.html");         // open web page file
                     if (webFile) {                           // if the webfile exist
                         while(webFile.available()) {         // the webfile is avaible
-                            client.write(webFile.read());    // send webfile to client
+                            serverGateway.write(webFile.read());    // send webfile to client
                         }
                         webFile.close();
                     }
@@ -122,6 +122,6 @@ void loop() {
             }                                                // end if (client.available())
         } // end while (client.connected())
         delay(1);                                            // give the web browser time to receive the data
-        client.stop();                                       // close the connection
+        serverGateway.stop();                                       // close the connection
     }                                                        // end if (serverGateway)
 }                                                            //end void loop

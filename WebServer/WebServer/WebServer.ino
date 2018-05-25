@@ -50,7 +50,7 @@ void loop()
                     client.println("Connection: close");
                     client.println();
                     // send web page
-                    webFile = SD.open("index.htm");        // open web page file
+                    webFile = SD.open("index.html");        // open web page file
                     if (webFile) {
                         while(webFile.available()) {
                             client.write(webFile.read()); // send web page to client
