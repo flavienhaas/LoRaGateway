@@ -150,12 +150,18 @@ bool readFrameAndCheckTS(){
     }
   else{
     SerialUSB.println("New Frame :");
-    SerialUSB.println(protocol.getStationId(),HEX);
+    SerialUSB.print("ID = ");
+    SerialUSB.print(protocol.getStationId(),HEX);
     SerialUSB.println(protocol.getGatewayId(),HEX);
+    SerialUSB.print("TS = ");
     SerialUSB.println(protocol.getTimestampMessage(),HEX);
+    SerialUSB.print("DT = ");
     SerialUSB.println(protocol.getDataType(),HEX);
+    SerialUSB.print("D1 = ");
     SerialUSB.println(protocol.getDataOne(),HEX);
+    SerialUSB.print("D2 = ");
     SerialUSB.println(protocol.getDataTwo(),HEX);
+    SerialUSB.print("D3 = ");
     SerialUSB.println(protocol.getDataThree(),HEX);
     return true;
   }
