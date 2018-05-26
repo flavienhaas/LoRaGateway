@@ -27,16 +27,28 @@ EthernetServer server(80);                                  // initialize the Et
 void setup(){
   Serial.begin(9600);
   while (!Serial);                                          // wait for serial to initialize
-  Serial.print("Passerelle LoRa\n");                        // display on serial the name of the device
+  Serial.println("LoRa Gateway");                           // display on serial the name of the device
 
   thisLoRa.begin();                                         // initialise LoRa
 
   //Ethernet.begin(mac, ip);                                // initialize Ethernet shield using the set mac adress and set IP
   Ethernet.begin(mac);                                      // initialize Ethernet shield uding the set mac and DHCP for the IP
   server.begin();                                           // initialize WebServer part of the librairy
-  Serial.print("server is at ");                            // display on serial the IP you can find the webpage
-  Serial.println(Ethernet.localIP());
-}
+  Serial.print("server is at ");
+  Serial.println(Ethernet.localIP());                       // display on serial the IP you can find the webpage
+
+  Serial.println("Initializing SD card...");                // initialize SD card
+  if (!SD.begin(4)) {
+      Serial.println("ERROR - SD card initialization failed!");
+      return;                                               // init failed
+  }
+  Serial.println("SUCCESS - SD card initialized.");
+  if (!SD.exists("index.htm")) {                            // check for index.htm file
+      Serial.println("ERROR - Can't find index.htm file!");
+      return;                                               // can't find index file
+  }
+  Serial.println("SUCCESS - Found index.htm file.");
+}                                                           // end of setup
 
 //void SerialPrintElapsedTime( boolean espaceFinal=true ){  // to display the elapsed time
 //  unsigned long h,m,s = millis()/1000;
@@ -69,19 +81,19 @@ void loop() {
 //        SerialPrintElapsedTime();                         // diplay the time the frame arrived
 
 // post to server
-  EthernetClient postClient;
-  String postdata = "&ID="+String(protocol.getStationId())+"&IDp="+String(protocol.getGatewayId())+"&TS="+String(protocol.getTimestampMessage())+"&DT="+String(protocol.getDataType())+"&D1="+String(protocol.getDataOne())+"&D2="+String(protocol.getDataTwo())+"&D3="+String(protocol.getDataThree());
-  bool connected = postClient.connect("weather.limayrac.ovh", 80);
-    if (connected){
-      postClient.println("POST /formulaireCollecte.html HTTP/1.1");
-      postClient.println("Host: btslimayrac.ovh");
-      postClient.println("Cache-Control: no-cache");
-      postClient.println("Content-Type: application/x-www-form-urlencoded");
-      postClient.print("Content-Length: ");
-      //postClient.println(postData.length());
-      //postClient.println(postData);
-      }
-   Serial.println("post envoye vers le serveur");
+//  EthernetClient postClient;
+//  String postdata = "&ID="+String(protocol.getStationId())+"&IDp="+String(protocol.getGatewayId())+"&TS="+String(protocol.getTimestampMessage())+"&DT="+String(protocol.getDataType())+"&D1="+String(protocol.getDataOne())+"&D2="+String(protocol.getDataTwo())+"&D3="+String(protocol.getDataThree());
+//  bool connected = postClient.connect("weather.limayrac.ovh", 80);
+//    if (connected){
+//      postClient.println("POST /formulaireCollecte.html HTTP/1.1");
+//      postClient.println("Host: btslimayrac.ovh");
+//      postClient.println("Cache-Control: no-cache");
+//      postClient.println("Content-Type: application/x-www-form-urlencoded");
+//      postClient.print("Content-Length: ");
+//      //postClient.println(postData.length());
+//      //postClient.println(postData);
+//      }
+//   Serial.println("post envoye vers le serveur");
 
 // WebServer
     EthernetClient serverGateway = server.available();      // try to get client
@@ -89,8 +101,8 @@ void loop() {
     if (serverGateway) {                                    // got client?
         boolean currentLineIsBlank = true;
         while (serverGateway.connected()) {
-            if (serverGateway.available()) {                       // client data available to read
-                char c = serverGateway.read();                     // read 1 byte (character) from client
+            if (serverGateway.available()) {                // client data available to read
+                char c = serverGateway.read();              // read 1 byte (character) from client
                                                             // last line of client request is blank and ends with \n
                                                             // respond to client only after last line received
                 if (c == '\n' && currentLineIsBlank) {
@@ -100,7 +112,7 @@ void loop() {
                     serverGateway.println("Connection: close");
                     serverGateway.println();
                     // send web page
-                    webFile = SD.open("index.html");         // open web page file
+                    webFile = SD.open("index.htm");          // open web page file
                     if (webFile) {                           // if the webfile exist
                         while(webFile.available()) {         // the webfile is avaible
                             serverGateway.write(webFile.read());    // send webfile to client
@@ -120,8 +132,8 @@ void loop() {
                     currentLineIsBlank = false;
                 }
             }                                                // end if (client.available())
-        } // end while (client.connected())
+        }                                                    // end while (client.connected())
         delay(1);                                            // give the web browser time to receive the data
-        serverGateway.stop();                                       // close the connection
+        serverGateway.stop();                                // close the connection
     }                                                        // end if (serverGateway)
 }                                                            //end void loop
