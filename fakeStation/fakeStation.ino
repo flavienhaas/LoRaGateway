@@ -70,11 +70,14 @@ void loop()
   SerialUSB.println(msg.d3, HEX);
   SerialUSB.println(" ");
   
-  SerialUSB.println("Sending packet !");
-  LoRa.beginPacket();
-  LoRa.write((uint8_t*)&msg, 12);
-  LoRa.endPacket();
-
-  SerialUSB.println("-----------------------------");
-  delay(4000);
+  for(int i=0; i<3; i++){
+      SerialUSB.println("Sending packet !");
+      LoRa.beginPacket();
+      LoRa.write((uint8_t*)&msg, 12);
+      LoRa.endPacket();
+    
+      SerialUSB.println("-----------------------------");
+      delay(4000);
+    }
+    delay(10000);
 }
