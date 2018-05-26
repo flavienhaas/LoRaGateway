@@ -52,7 +52,7 @@ void loop() {
   int packetSize = thisLoRa.parsePacket();
   if (packetSize > 0)
   {
-    SerialUSB.println("Nouveau paquet");
+    SerialUSB.println("Nouvelle trame reçue");
 
     thisLoRa.read(&protocol);                               // objet thislora qui appele classe Lora.h et rempli la stucture de l'objet protocol, ser a allèger -5lignes
     
@@ -81,6 +81,7 @@ void loop() {
       //postClient.println(postData.length());
       //postClient.println(postData);
       }
+   Serial.println("post envoye vers le serveur");
 
 // WebServer
     EthernetClient serverGateway = server.available();      // try to get client

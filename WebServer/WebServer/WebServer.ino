@@ -5,17 +5,21 @@
 //#define Serial SerialUSB
 
 // MAC address from Ethernet shield sticker under board
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0xFD };
-IPAddress ip(10, 0, 0, 50); // IP address, may need to change depending on network
+byte mac[] = { 0xFE, 0xFD, 0xBE, 0xEF, 0xFF, 0xFD };
+IPAddress ip(192, 168, 1, 50); // IP address, may need to change depending on network
 EthernetServer server(80);  // create a server at port 80
 
 File webFile;
 
 void setup()
 {
-    Ethernet.begin(mac);  // initialize Ethernet device
-    server.begin();           // start to listen for clients
     Serial.begin(9600);       // for debugging
+    
+    Ethernet.begin(mac, ip);  // initialize Ethernet device
+    Serial.println("hello");
+    server.begin();           // start to listen for clients
+    Serial.print("server is at ");                            // display on serial the IP you can find the webpage
+    Serial.println(Ethernet.localIP());
     
     // initialize SD card
     Serial.println("Initializing SD card...");
