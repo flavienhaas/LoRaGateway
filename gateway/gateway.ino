@@ -65,23 +65,21 @@ void loop() {
 
 // frame treatment
 while(readFrameAndCheckTS() == true){
-  Serial.println("trame envoyée");
+  // post to server
+  EthernetClient postClient;
+  String postdata = "&ID="+String(protocol.getStationId())+"&IDp="+String(protocol.getGatewayId())+"&TS="+String(protocol.getTimestampMessage())+"&DT="+String(protocol.getDataType())+"&D1="+String(protocol.getDataOne())+"&D2="+String(protocol.getDataTwo())+"&D3="+String(protocol.getDataThree());
+  bool connected = postClient.connect("weather.limayrac.ovh", 80);
+    if (connected){
+      postClient.println("POST /formulaireCollecte.html HTTP/1.1");
+      postClient.println("Host: btslimayrac.ovh");
+      postClient.println("Cache-Control: no-cache");
+      postClient.println("Content-Type: application/x-www-form-urlencoded");
+      postClient.print("Content-Length: ");
+      //postClient.println(postData.length());
+      //postClient.println(postData);
+      }
+  Serial.println("Post to server sent");
 }
-
-// post to server
-//  EthernetClient postClient;
-//  String postdata = "&ID="+String(protocol.getStationId())+"&IDp="+String(protocol.getGatewayId())+"&TS="+String(protocol.getTimestampMessage())+"&DT="+String(protocol.getDataType())+"&D1="+String(protocol.getDataOne())+"&D2="+String(protocol.getDataTwo())+"&D3="+String(protocol.getDataThree());
-//  bool connected = postClient.connect("weather.limayrac.ovh", 80);
-//    if (connected){
-//      postClient.println("POST /formulaireCollecte.html HTTP/1.1");
-//      postClient.println("Host: btslimayrac.ovh");
-//      postClient.println("Cache-Control: no-cache");
-//      postClient.println("Content-Type: application/x-www-form-urlencoded");
-//      postClient.print("Content-Length: ");
-//      //postClient.println(postData.length());
-//      //postClient.println(postData);
-//      }
-//   Serial.println("post envoye vers le serveur");
 
 // WebServer
     EthernetClient serverGateway = server.available();       // try to get client
