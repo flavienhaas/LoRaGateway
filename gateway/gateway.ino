@@ -52,14 +52,6 @@ void setup(){
 }                                                            // end of setup
 
 void loop() {
-// LoRa receiver
-//  int packetSize = thisLoRa.parsePacket();
-//  if (packetSize > 0)
-//  {
-//    thisLoRa.read(&protocol);                                // objet thislora qui appele classe Lora.h et rempli la stucture de l'objet protocol, ser a allèger -5lignes
-//    SerialUSB.println("Frame recieved");
-//    delay(100);
-//  }
 
 //        SerialPrintElapsedTime();                          // diplay the time the frame arrived
 
