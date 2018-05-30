@@ -15,13 +15,13 @@ void setup(){
   delay(1000);
   Serial.println("connecting...");
 
-  trameToSend.setStationId(0x07);
+  trameToSend.setStationId(0x05);
   trameToSend.setGatewayId(0x07);
   trameToSend.setTimestampMessage(0x0000);
   trameToSend.setDataType(0x0001);
-  trameToSend.setDataOne(0x0004);
+  trameToSend.setDataOne(0x0293);
   trameToSend.setDataTwo(0x0005);
-  trameToSend.setDataThree(0x0006);
+  trameToSend.setDataThree(0x0000);
   
 }
  
