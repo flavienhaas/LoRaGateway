@@ -20,7 +20,7 @@ File webFile;                                                // variable for the
 
 // void setSPIFrequency(uint32_t frequency);                 // set the SPI at 8MHz to use logic analyser
 
-byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0xFD};           // set the mac address
+byte mac[] = {0xFA, 0xE3, 0x40, 0xEF, 0xFF, 0xFD};           // set the mac address
 IPAddress ip(192, 1, 1, 150);                                // set the IP address for the ethernet shield, overwise the librairy use DHCP
 
 EthernetServer server(80);                                   // initialize the EthernetServer library, using port 80 (default fot HTTP)
@@ -67,18 +67,21 @@ void loop() {
 while(readFrameAndCheckTS() == true){
   // post to server
   EthernetClient postClient;
-  String postdata = "&ID="+String(protocol.getStationId())+"&IDp="+String(protocol.getGatewayId())+"&TS="+String(protocol.getTimestampMessage())+"&DT="+String(protocol.getDataType())+"&D1="+String(protocol.getDataOne())+"&D2="+String(protocol.getDataTwo())+"&D3="+String(protocol.getDataThree());
-  bool connected = postClient.connect("weather.limayrac.ovh", 80);
-    if (connected){
-      postClient.println("POST /formulaireCollecte.html HTTP/1.1");
-      postClient.println("Host: btslimayrac.ovh");
-      postClient.println("Cache-Control: no-cache");
-      postClient.println("Content-Type: application/x-www-form-urlencoded");
+  String postData = "ID="+String(protocol.getStationId())+"&IDp="+String(protocol.getGatewayId())+"&TS="+String(protocol.getTimestampMessage())+"&DT="+String(protocol.getDataType())+"&D1="+String(protocol.getDataOne())+"&D2="+String(protocol.getDataTwo())+"&D3="+String(protocol.getDataThree());
+    if (postClient.connect("btslimayrac.ovh", 80)){
+      postClient.print("POST /weather/formulaire/formulaireCollecteLORA.php HTTP/1.1\n");
+      postClient.print("Host: weather.btslimayrac.ovh\n");
+      postClient.print("Connection: close\n");
+      postClient.print("Content-Type: application/x-www-form-urlencoded\n");
       postClient.print("Content-Length: ");
-      //postClient.println(postData.length());
-      //postClient.println(postData);
+      postClient.print(postData.length());
+      postClient.print("\n\n");
+      postClient.print(postData);
+      Serial.println("Post to server sent");
       }
-  Serial.println("Post to server sent");
+     else{
+      Serial.println("Post failed");
+     }
 }
 
 // WebServer
@@ -131,7 +134,7 @@ bool readFrameAndCheckTS(){
   if (packetSize > 0)
   {
     thisLoRa.read(&protocol);                                // objet thislora qui appele classe Lora.h et rempli la stucture de l'objet protocol, ser a allèger -5lignes
-    SerialUSB.println("Frame recieved");
+    SerialUSB.println("Frame received");
     delay(100);
   }
   ts1 = protocol.getTimestampMessage();
@@ -139,7 +142,7 @@ bool readFrameAndCheckTS(){
   if (packetSize > 0)
   {
     thisLoRa.read(&protocol);                                // objet thislora qui appele classe Lora.h et rempli la stucture de l'objet protocol, ser a allèger -5lignes
-    SerialUSB.println("Frame recieved");
+    SerialUSB.println("Frame received");
     delay(100);
   }
   ts2 = protocol.getTimestampMessage();
@@ -164,7 +167,6 @@ bool readFrameAndCheckTS(){
     return true;
   }
 }
-
 
 //void PrintElapsedTime( boolean espaceFinal=true ){         // to display the elapsed time
 //  unsigned long h,m,s = millis()/1000;
