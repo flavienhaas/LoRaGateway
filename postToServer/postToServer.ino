@@ -3,7 +3,6 @@
 #include <CProtocol12Bytes.h>                                // to use our protocol
  
 byte mac[] = {0xFA, 0xE3, 0x40, 0xEF, 0xFF, 0xFD};           // set the mac address
-EthernetClient client;
 
 CProtocol12Bytes trameToSend;
 
