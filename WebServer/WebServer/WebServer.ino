@@ -2,49 +2,43 @@
 #include <Ethernet.h>
 #include <SD.h>
 
-//#define Serial SerialUSB
-
-// MAC address from Ethernet shield sticker under board
 byte mac[] = { 0xFE, 0xFD, 0xBE, 0xEF, 0xFF, 0xFD };
-IPAddress ip(192, 168, 1, 50); // IP address, may need to change depending on network
-EthernetServer server(80);  // create a server at port 80
 
-File webFile;
+EthernetServer server(80);                       // create a server at port 80
+
+File webFile;                                    // var webfile de type File
 
 void setup()
 {
-    Serial.begin(9600);       // for debugging
+    Serial.begin(9600);                          // for debugging
     
-    Ethernet.begin(mac, ip);  // initialize Ethernet device
-    Serial.println("hello");
-    server.begin();           // start to listen for clients
-    Serial.print("server is at ");                            // display on serial the IP you can find the webpage
-    Serial.println(Ethernet.localIP());
+    Ethernet.begin(mac);                         // initialize Ethernet device
+    server.begin();                              // start to listen for clients
+    SerialUSB.print("server is at ");            // display on serial the IP you can find the webpage
+    SerialUSB.println(Ethernet.localIP());
     
-    // initialize SD card
     Serial.println("Initializing SD card...");
-    if (!SD.begin(4)) {
+    if (!SD.begin(4)) {                                                     // initialize SD card
         Serial.println("ERROR - SD card initialization failed!");
-        return;    // init failed
+        return;                                                             // init failed
     }
     Serial.println("SUCCESS - SD card initialized.");
-    // check for index.htm file
-    if (!SD.exists("index.htm")) {
+    if (!SD.exists("index.htm")) {                                          // check for index.htm file
         Serial.println("ERROR - Can't find index.htm file!");
-        return;  // can't find index file
+        return;                                                             // can't find index file
     }
     Serial.println("SUCCESS - Found index.htm file.");
 }
 
 void loop()
 {
-    EthernetClient client = server.available();  // try to get client
+    EthernetClient client = server.available();                           // try to get client
 
     if (client) {  // got client?
         boolean currentLineIsBlank = true;
         while (client.connected()) {
-            if (client.available()) {   // client data available to read
-                char c = client.read(); // read 1 byte (character) from client
+            if (client.available()) {                                     // client data available to read
+                char c = client.read();                                   // read 1 byte (character) from client
                 // last line of client request is blank and ends with \n
                 // respond to client only after last line received
                 if (c == '\n' && currentLineIsBlank) {
