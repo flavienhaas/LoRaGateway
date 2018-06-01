@@ -56,13 +56,13 @@ void loop() {
 //        SerialPrintElapsedTime();                          // diplay the time the frame arrived
 
 // frame treatment
-while(readFrameAndCheckTS() == true){
+while(readFrameAndCheckID() == true){
   // post to server
   EthernetClient postClient;
   String postData = "ID="+String(protocol.getStationId())+"&IDp="+String(protocol.getGatewayId())+"&TS="+String(protocol.getTimestampMessage())+"&DT="+String(protocol.getDataType())+"&D1="+String(protocol.getDataOne())+"&D2="+String(protocol.getDataTwo())+"&D3="+String(protocol.getDataThree());
     if (postClient.connect("btslimayrac.ovh", 80)){
       postClient.print("POST /weather/formulaire/formulaireCollecteLORA.php HTTP/1.1\n");
-      postClient.print("Host: weather.btslimayrac.ovh\n");
+      postClient.print("Host: btslimayrac.ovh\n");
       postClient.print("Connection: close\n");
       postClient.print("Content-Type: application/x-www-form-urlencoded\n");
       postClient.print("Content-Length: ");
@@ -119,6 +119,36 @@ while(readFrameAndCheckTS() == true){
     }                                                        // end if (serverGateway)
 }                                                            //end void loop
 
+bool readFrameAndCheckID(){
+  int id1=0;                                                   // for comparing later the LoRa frames using ID data
+  int id2=0;                                                   // for comparing later the LoRa frames using ID data
+  int packetSize = thisLoRa.parsePacket();
+  if (packetSize > 0)
+  {
+    thisLoRa.read(&protocol);                                // objet thislora qui appele classe Lora.h et rempli la stucture de l'objet protocol, ser a allèger -5lignes
+    SerialUSB.println("Frame received");
+    delay(100);
+  }
+  id1 = protocol.getStationId();
+  // big delay
+  packetSize = thisLoRa.parsePacket();
+  if (packetSize > 0)
+  {
+    thisLoRa.read(&protocol);                                // objet thislora qui appele classe Lora.h et rempli la stucture de l'objet protocol, ser a allèger -5lignes
+    SerialUSB.println("Frame received");
+    delay(100);
+  }
+  id2 = protocol.getStationId();
+  if(id1==id2){
+    readFrameAndCheckID();
+    }
+  else{
+    readFrameAndCheckTS();
+    return true;
+    }
+} //end readframeandcheckid
+
+
 bool readFrameAndCheckTS(){
   int ts1=0;                                                   // for comparing later the LoRa frames using timestamp data
   int ts2=0;                                                   // for comparing later the LoRa frames using timestamp data
@@ -157,8 +187,24 @@ bool readFrameAndCheckTS(){
     SerialUSB.print("D3 = ");
     SerialUSB.println(protocol.getDataThree(),HEX);
     return true;
-  }
-}
+    }
+} //end readframeandcheckts
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //void PrintElapsedTime( boolean espaceFinal=true ){         // to display the elapsed time
 //  unsigned long h,m,s = millis()/1000;
