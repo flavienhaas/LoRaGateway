@@ -1,39 +1,33 @@
 #include <SPI.h>
 #include <Ethernet.h>
 #include <SD.h>
-
 byte mac[] = { 0xFE, 0xFD, 0xBE, 0xEF, 0xFF, 0xFD };
-
 EthernetServer server(80);                       // create a server at port 80
-
 File webFile;                                    // var webfile de type File
 
 void setup()
 {
-    Serial.begin(9600);                          // for debugging
-    
+    SerialUSB.begin(9600);                          // for debugging
     Ethernet.begin(mac);                         // initialize Ethernet device
     server.begin();                              // start to listen for clients
     SerialUSB.print("server is at ");            // display on serial the IP you can find the webpage
     SerialUSB.println(Ethernet.localIP());
-    
-    Serial.println("Initializing SD card...");
+    SerialUSB.println("Initializing SD card...");
     if (!SD.begin(4)) {                                                     // initialize SD card
-        Serial.println("ERROR - SD card initialization failed!");
+        SerialUSB.println("ERROR - SD card initialization failed!");
         return;                                                             // init failed
     }
-    Serial.println("SUCCESS - SD card initialized.");
+    SerialUSB.println("SUCCESS - SD card initialized.");
     if (!SD.exists("index.htm")) {                                          // check for index.htm file
-        Serial.println("ERROR - Can't find index.htm file!");
+        SerialUSB.println("ERROR - Can't find index.htm file!");
         return;                                                             // can't find index file
     }
-    Serial.println("SUCCESS - Found index.htm file.");
+    SerialUSB.println("SUCCESS - Found index.htm file.");
 }
 
 void loop()
 {
     EthernetClient client = server.available();                           // try to get client
-
     if (client) {  // got client?
         boolean currentLineIsBlank = true;
         while (client.connected()) {
