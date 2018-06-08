@@ -18,12 +18,20 @@ CProtocol12Bytes protocol;                                   // create object to
 
 File webFile;                                                // variable for the file containing the webpage
 
-// void setSPIFrequency(uint32_t frequency);                 // set the SPI at 8MHz to use logic analyser
-
 byte mac[] = {0xFA, 0xE3, 0x40, 0xEF, 0xFF, 0xFD};           // set the mac address
 IPAddress ip(192, 1, 1, 150);                                // set the IP address for the ethernet shield, overwise the librairy use DHCP
 
 EthernetServer server(80);                                   // initialize the EthernetServer library, using port 80 (default fot HTTP)
+
+int ts1=0;                                                   // for comparing later the LoRa frames using timestamp data
+int ts2=0;                                                   // for comparing later the LoRa frames using timestamp data
+int id1=0;                                                   // for comparing later the LoRa frames using ID data
+int id2=0;                                                   // for comparing later the LoRa frames using ID data
+
+bool readFrameAndCheckID();                                  //function that compares station's ID
+bool readFrameAndCheckTS();                                  //function that compares frame's TimeStamp
+
+// void setSPIFrequency(uint32_t frequency);                 // set the SPI at 8MHz to use logic analyser
 
 void setup(){
   Serial.begin(9600);
@@ -78,7 +86,6 @@ while(readFrameAndCheckID() == true){
 
 // WebServer
     EthernetClient serverGateway = server.available();       // try to get client
-
     if (serverGateway) {                                     // got client?
         boolean currentLineIsBlank = true;
         while (serverGateway.connected()) {
@@ -120,8 +127,6 @@ while(readFrameAndCheckID() == true){
 }                                                            //end void loop
 
 bool readFrameAndCheckID(){
-  int id1=0;                                                   // for comparing later the LoRa frames using ID data
-  int id2=0;                                                   // for comparing later the LoRa frames using ID data
   int packetSize = thisLoRa.parsePacket();
   if (packetSize > 0)
   {
@@ -148,10 +153,7 @@ bool readFrameAndCheckID(){
     }
 } //end readframeandcheckid
 
-
 bool readFrameAndCheckTS(){
-  int ts1=0;                                                   // for comparing later the LoRa frames using timestamp data
-  int ts2=0;                                                   // for comparing later the LoRa frames using timestamp data
   int packetSize = thisLoRa.parsePacket();
   if (packetSize > 0)
   {
@@ -189,22 +191,6 @@ bool readFrameAndCheckTS(){
     return true;
     }
 } //end readframeandcheckts
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //void PrintElapsedTime( boolean espaceFinal=true ){         // to display the elapsed time
 //  unsigned long h,m,s = millis()/1000;

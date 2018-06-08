@@ -1,3 +1,7 @@
+// Flavien HAAS, 2018
+// before transfert, check these things:
+// have all the librairies needed installed on your machine
+
 void setup() {
 Serial.begin(9600);
 }

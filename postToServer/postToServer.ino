@@ -1,3 +1,8 @@
+// Flavien HAAS, 2018
+// before transfert, check these things:
+// have all the librairies needed installed on your machine
+// changed the SS port for ethernet as indicated on the README or you will not be able to use the LoRa shield as the same time as the Ethernet shield
+
 #include <SPI.h>                                             // to use SPI
 #include <Ethernet.h>                                        // to use ethernet
 #include <CProtocol12Bytes.h>                                // to use our frame protocol
