@@ -7,16 +7,8 @@
 #include <CModemLoRa.h>                                      // to use personalised LoRa class
 #include <CProtocol12Bytes.h>                                // to use our protocol
 
-CModemLoRa thisLoRa;                                         // create object for personnalizeed LoRa class
-CProtocol12Bytes goodOne;                                   // create object to store data using our protocol
-
-int ts1=0;                                                   // for comparing later the LoRa frames using timestamp data
-int ts2=0;                                                   // for comparing later the LoRa frames using timestamp data
-int id1=0;                                                   // for comparing later the LoRa frames using ID data
-int id2=0;                                                   // for comparing later the LoRa frames using ID data
-
-bool readFrameAndCheckID();                                  // function that compares station's ID
-bool readFrameAndCheckTS();                                  // function that compares frame's TimeStamp
+CModemLoRa receiveLoRa;                                      // create object for personnalizeed LoRa class
+CProtocol12Bytes goodOne;                                    // create object that will be used to send data using our protocol
 
 void setup(){
   Serial.begin(9600);
@@ -30,22 +22,6 @@ void loop() {
   // frame treatment
   while(readFrameAndCheckID() == true){
     // post to server
-    EthernetClient postClient;
-    String postData = "ID="+String(goodOne.getStationId())+"&IDp="+String(goodOne.getGatewayId())+"&TS="+String(goodOne.getTimestampMessage())+"&DT="+String(goodOne.getDataType())+"&D1="+String(goodOne.getDataOne())+"&D2="+String(goodOne.getDataTwo())+"&D3="+String(goodOne.getDataThree());
-      if (postClient.connect("btslimayrac.ovh", 80)){
-        postClient.print("POST /weather/formulaire/formulaireCollecteLORA.php HTTP/1.1\n");
-        postClient.print("Host: btslimayrac.ovh\n");
-        postClient.print("Connection: close\n");
-        postClient.print("Content-Type: application/x-www-form-urlencoded\n");
-        postClient.print("Content-Length: ");
-        postClient.print(postData.length());
-        postClient.print("\n\n");
-        postClient.print(postData);
-        Serial.println("Post to server sent");
-        }
-       else{
-        Serial.println("Post failed");
-       }
   }
 
 }// end void loop

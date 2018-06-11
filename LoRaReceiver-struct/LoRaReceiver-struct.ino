@@ -8,7 +8,6 @@ CProtocol12Bytes protocol;
 
 void setup() {
   SerialUSB.begin(9600);
-  while (!SerialUSB){};
   SerialUSB.println("LoRa Receiver");
   thisLoRa.begin();
 }
@@ -17,7 +16,7 @@ void loop() {
   int packetSize = thisLoRa.parsePacket();
   if (packetSize > 0)
   {
-    thisLoRa.read(&protocol);                                // objet thislora qui appele classe Lora.h et rempli la stucture de l'objet protocol, ser a allèger -5lignes
+    thisLoRa.read(&protocol);                                
     SerialUSB.println("Frame received");
     delay(100);
     SerialUSB.print("ID = ");
@@ -34,5 +33,12 @@ void loop() {
     SerialUSB.print("D3 = ");
     SerialUSB.println(protocol.getDataThree(),HEX);
   }
-  
 }
+
+
+
+
+
+
+
+// objet thislora qui appele classe Lora.h et rempli la stucture de l'objet protocol, ser a allèger -5lignes
