@@ -27,7 +27,6 @@ int numCase;                                                 // used to associat
 
 void setup(){
   SerialUSB.begin(9600);
-  while (!SerialUSB);                                        // wait for serial to initialize
   SerialUSB.println("LoRa Gateway");                         // display on serial the name of the device
 
   thisLoRa.begin();                                          // initialise LoRa
@@ -104,7 +103,7 @@ void loop() {
 
 // WebServer
     EthernetClient serverGateway = server.available();       // try to get client
-    if (serverGateway) {                                     // got client?
+    while (serverGateway) {                                     // got client?
         boolean currentLineIsBlank = true;
         if (serverGateway.connected()) {
             if (serverGateway.available()) {                 // client data available to read
@@ -125,7 +124,7 @@ void loop() {
                         }
                         webFile.close();
                     }
-                    //break;
+                    break;
                 }
                                                              // every line of text received from the client ends with \r\n
                 if (c == '\n') {
@@ -140,7 +139,8 @@ void loop() {
             }                                                // end if (client.available())
         }                                                    // end while (client.connected())
         delay(1);                                            // give the web browser time to receive the data
-        serverGateway.stop();                                // close the connection
+        serverGateway.stop();                              // close the connection
+        break;
     }//end if (serverGateway)
 }//end void loop
 
