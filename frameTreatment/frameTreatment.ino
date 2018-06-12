@@ -11,7 +11,7 @@ CModemLoRa thisLoRa;                                         // create object fo
 CProtocol12Bytes received;                                   // create object that will be used to send data using our protocol
 
 uint16_t saveIDandTS[255];                                   // used to send the correct frame
-int numCase;
+int numCase;                                                 // used to associates timestamp and id in the arraw
 
 void setup(){
   SerialUSB.begin(9600);
