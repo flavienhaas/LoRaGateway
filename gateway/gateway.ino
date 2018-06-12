@@ -19,7 +19,7 @@ CProtocol12Bytes protocol;                                   // create object to
 File webFile;                                                // variable for the file containing the webpage
 
 byte mac[] = {0xFA, 0xE3, 0x40, 0xEF, 0xFF, 0xFD};           // set the mac address
-IPAddress ip(192, 1, 1, 150);                                // set the IP address for the ethernet shield, overwise the librairy use DHCP
+//IPAddress ip(192, 1, 1, 150);                                // set the IP address for the ethernet shield, overwise the librairy use DHCP
 
 EthernetServer server(80);                                   // initialize the EthernetServer library, using port 80 (default fot HTTP)
 

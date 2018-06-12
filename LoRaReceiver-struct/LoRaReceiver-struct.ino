@@ -35,10 +35,4 @@ void loop() {
   }
 }
 
-
-
-
-
-
-
 // objet thislora qui appele classe Lora.h et rempli la stucture de l'objet protocol, ser a allèger -5lignes
