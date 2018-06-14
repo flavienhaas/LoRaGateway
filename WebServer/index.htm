@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang='fr' class=''>
+	<head>
+		<meta charset='utf-8'>
+		<meta name='viewport' content='width=device-width,initial-scale=1,user-scalable=no'/>
+		<meta http-equiv='refresh' content='1' />
+		<title>Passerelle LoRa</title>
+		<style>
+			div,fieldset,input,select
+			{
+				padding:5px;
+				font-size:1em;
+			}
+
+			input
+			{
+				width:100%;
+				box-sizing:border-box;
+				-webkit-box-sizing:border-box;
+				-moz-box-sizing:border-box;
+			}
+
+			select
+			{
+				width:100%;
+			}
+
+			textarea
+			{
+				resize:none;
+				width:98%;
+				height:318px;
+				padding:5px;
+				overflow:auto;
+			}
+
+			body
+			{
+				text-align:center;
+				font-family:verdana;
+				background-color: #bcd5ff;
+			}
+
+			td
+			{
+				padding:0px;
+			}
+
+			button
+			{
+				border:0;
+				border-radius:0.3rem;
+				background-color:#1fa3ec;
+				color:#fff;
+				line-height:2.4rem;
+				font-size:1.2rem;
+				width:100%;
+				-webkit-transition-duration:0.4s;
+				transition-duration:0.4s;
+			}
+
+			button:hover
+			{
+				background-color:#006cba;
+			}
+
+			.p
+			{
+				float:left;
+				text-align:left;
+			}
+
+			.q
+			{
+				float:right;
+				text-align:right;
+			}
+		</style>
+	</head>
+	<body onload='alea()'>
+		<script>
+			function alea() {
+				var x = document.getElementById('demo')x.innerHTML = Math.floor((Math.random() * 10) + 1);
+			}
+		</script>
+		<div style='text-align:left;display:inline-block;min-width:340px;'>
+			<div style='text-align:center;'>
+				<h1>Passerelle LoRa</h1>
+			</div>
+			<div>
+				<h2>[Température actuelle]</h2>
+			</div>
+			<div>
+				<p>
+					Nombre d'échantillons envoyés = %, Echec d'envoi : %
+				</p>
+			</div>
+			<div id='l1' name='l1'></div>
+			<table style='width:100%'>
+				<tr>
+					<button onclick='la('?o=1');'>Informations</button>
+				</tr>
+				<tr>
+					<button onclick='alea()'>rafraichir</button>
+				</tr>
+				<tr>
+					<button onclick='la('?o=1');'>Redémarrer</button>
+				</tr>
+			</table>
+		</div>
+	</body>
+</html>

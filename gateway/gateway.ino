@@ -15,6 +15,10 @@ CProtocol12Bytes protocol;                                   // create object to
 
 File webFile;                                                // variable for the file containing the webpage
 
+//String postData;
+//String tsarray;
+//String oldpostData;
+
 byte mac[] = {0xFA, 0xE3, 0x40, 0xEF, 0xFF, 0xFD};           // set the mac address
 //IPAddress ip(192, 1, 1, 150);                                // set the IP address for the ethernet shield, overwise the librairy use DHCP
 
@@ -43,11 +47,11 @@ void setup(){
       return;                                                // init failed
   }
   SerialUSB.println("SUCCESS - SD card initialized.");
-  if (!SD.exists("index.htm")) {                             // check for index.htm file
-      SerialUSB.println("ERROR - Can't find index.htm file!");
+  if (!SD.exists("index.html")) {                             // check for index.html file
+      SerialUSB.println("ERROR - Can't find index.html file!");
       return;                                                // can't find index file
   }
-  SerialUSB.println("SUCCESS - Found index.htm file.");
+  SerialUSB.println("SUCCESS - Found index.html file.");
 }// end of setup
 
 void loop() {
@@ -117,7 +121,7 @@ void loop() {
                     serverGateway.println("Connection: close");
                     serverGateway.println();
                     // send web page
-                    webFile = SD.open("index.htm");          // open web page file
+                    webFile = SD.open("index.html");          // open web page file
                     if (webFile) {                           // if the webfile exist
                         while(webFile.available()) {         // the webfile is avaible
                             serverGateway.write(webFile.read());    // send webfile to client
