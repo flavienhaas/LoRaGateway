@@ -6,18 +6,22 @@
 #include <SPI.h>                                             // to communicate using spi (required for our shields)
 #include <LoRa.h>                                            // to use the LoRa shield
 #include <Ethernet.h>                                        // to use the ethernet shield
-#include <SD.h>                                              // to use a SD card
+//#include <SD.h>                                              // to use a SD card
 #include <CModemLoRa.h>                                      // to use personalised LoRa class
 #include <CProtocol12Bytes.h>                                // to use our protocol
 
 CModemLoRa thisLoRa;                                         // create object for personnalizeed LoRa class
 CProtocol12Bytes protocol;                                   // create object to store data using our protocol
 
-File webFile;                                                // variable for the file containing the webpage
+//File webFile;                                                // variable for the file containing the webpage
 
-//String postData;
-//String tsarray;
-//String oldpostData;
+String postData;
+String tsarray;
+String oldpostData;
+
+//Pour comparer les timestamps
+uint16_t tstamp_old;
+uint16_t tstamp_now;
 
 byte mac[] = {0xFA, 0xE3, 0x40, 0xEF, 0xFF, 0xFD};           // set the mac address
 //IPAddress ip(192, 1, 1, 150);                                // set the IP address for the ethernet shield, overwise the librairy use DHCP
@@ -31,27 +35,26 @@ int numCase;                                                 // used to associat
 
 void setup(){
   SerialUSB.begin(9600);
+  delay(500);
   SerialUSB.println("LoRa Gateway");                         // display on serial the name of the device
-
+  delay(100);
   thisLoRa.begin();                                          // initialise LoRa
-
+  delay(500);
   //Ethernet.begin(mac, ip);                                   // initialize Ethernet shield using the set mac adress and set IP and DHCP for the rest
   Ethernet.begin(mac);                                       // initialize Ethernet shield uding the set mac and DHCP for the rest
+  delay(500);
   server.begin();                                            // initialize WebServer part of the librairy
+  delay(500);
   SerialUSB.print("server is at ");
   SerialUSB.println(Ethernet.localIP());                     // display on serial the IP you can find the webpage
 
-  SerialUSB.println("Initializing SD card...");              // initialize SD card
-  if (!SD.begin(4)) {
-      SerialUSB.println("ERROR - SD card initialization failed!");
-      return;                                                // init failed
-  }
-  SerialUSB.println("SUCCESS - SD card initialized.");
-  if (!SD.exists("index.html")) {                             // check for index.html file
-      SerialUSB.println("ERROR - Can't find index.html file!");
-      return;                                                // can't find index file
-  }
-  SerialUSB.println("SUCCESS - Found index.html file.");
+  //SerialUSB.println("Initializing SD card...");              // initialize SD card
+  //SD.begin(4);
+  //delay(500);
+  //SerialUSB.println("SUCCESS - SD card initialized.");
+  //SD.exists("index.htm");
+  //delay(500);
+  //SerialUSB.println("SUCCESS - Found index.htm file.");
 }// end of setup
 
 void loop() {
@@ -67,10 +70,11 @@ void loop() {
     if(protocol.getTimestampMessage() == saveIDandTS[numCase])
       {}
     else{
+      tstamp_now = protocol.getTimestampMessage();
       saveIDandTS[numCase] = protocol.getTimestampMessage();
       //post to server
       EthernetClient postClient;
-      String postData = "ID="+String(protocol.getStationId())+"&IDp="+String(protocol.getGatewayId())+"&TS="+String(protocol.getTimestampMessage())+"&DT="+String(protocol.getDataType())+"&D1="+String(protocol.getDataOne())+"&D2="+String(protocol.getDataTwo())+"&D3="+String(protocol.getDataThree());
+      postData = "ID="+String(protocol.getStationId())+"&IDp="+String(protocol.getGatewayId())+"&TS="+String(protocol.getTimestampMessage())+"&DT="+String(protocol.getDataType())+"&D1="+String(protocol.getDataOne())+"&D2="+String(protocol.getDataTwo())+"&D3="+String(protocol.getDataThree());
       if (postClient.connect("btslimayrac.ovh", 80)){
       postClient.print("POST /weather/formulaire/formulaireCollecteLORA.php HTTP/1.1\n");
       postClient.print("Host: btslimayrac.ovh\n");             // specifies the Internet host and port number of the resource being requested
@@ -109,7 +113,7 @@ void loop() {
     EthernetClient serverGateway = server.available();       // try to get client
     while (serverGateway) {                                     // got client?
         boolean currentLineIsBlank = true;
-        if (serverGateway.connected()) {
+        while (serverGateway.connected()) {
             if (serverGateway.available()) {                 // client data available to read
                 char c = serverGateway.read();               // read 1 byte (character) from client
                                                              // last line of client request is blank and ends with \n
@@ -120,14 +124,57 @@ void loop() {
                     serverGateway.println("Content-Type: text/html");
                     serverGateway.println("Connection: close");
                     serverGateway.println();
-                    // send web page
-                    webFile = SD.open("index.html");          // open web page file
-                    if (webFile) {                           // if the webfile exist
-                        while(webFile.available()) {         // the webfile is avaible
-                            serverGateway.write(webFile.read());    // send webfile to client
-                        }
-                        webFile.close();
-                    }
+                    serverGateway.println("<!DOCTYPE HTML>");
+                    serverGateway.println("<html>");
+                    serverGateway.print("<head>");
+                    serverGateway.print("<meta http-equiv=\"refresh\" content=\"30\">");
+                    serverGateway.print("<meta charset=\"utf-8\" />");
+                    serverGateway.print("<link href=\"data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZWZmAHV2dgKNjo4Rent7A3JzcwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADhIrAL+/wgCnqKw3zMvMvayoqD0AAAACFRMaAMwAAAAAAAAAAAAAAAAAAAAAAAAA0stPANLLTwLTzFAi08xQPNPMUD3Sy0g6ycWOiq6+tP00gorYHHV1mLO2UDfd01AL08xQAM3ITAAAAAAA0stPANLLTgLTzFBm08xQ3tPMUPTTzFD108xQ9NTKTvZfr4X+ALjJ/zypl/3IxFDw1M1QptPMTxnTzE8AAAAAANPMUADTzFAt08xQ5dPMUP/TzFD/08xQ/9PMUP/UzE//or1g/2O6m/+sx8L/zch6/9LLTv/TzFB80cxUANnNRgDTzFAA08xQTdPMUPvTzFD/08xQ/9PMUP/TzFD/08xQ/9XMTv/RyGH/zMie/8nEbf/TzE//yslZsk+l1AoqmvkK08xQANPMUCvTzFDj08xQ/9PMUP/TzFD/08xQ/9PMUP/TzFD/0stQ/9DJUP/UzE7/1MxP/8HGYogjl/w1KJj2KtLMTwDSy04C08xQYtPMUOLTzFD/08xQ/9PMUP/TzFD/08xQ/9PMUP/UzFD/yc1Z/4TPk/8tv+SjKJf8IymZ9hsAAAAA08xPANPMUgDTzFBS08xQ9dPMUP/TzFD/08xQ/9PMUP/TzFD/1cxO/27Rpf8G1vv/Bs3+8h2p+EwnlPUgAAAAAAAAAADSy1AA0stPCtPMUHPTzFCi08xQ29PMUP/TzFD/1sxO/7/NYf8r1Nz/ANf//wbO/vIZrfhEJZP2JgAAAAAAAAAAAAAAANHKTwDRyk4At6ozANPMUD7UzE+608xQ47HJbfJH0cX/A9b+/wTS/voOwfuUL5z1Jiya9RUAAAAAAAAAAAAAAAAAAAAAAAAAANLLTwA6nuIAW6jDKXiwqkg+rthcC739rgvD/LkUufpoLJ72KTKd9jkxnfYPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGpP8AB+V+hMblP0NKJf4FiuU9TAnlPUoKZf1OyeY9RonmPYSLJv2CwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI5b2ACSW9gkklvUTH5X2ASKW9h4ml/UGKJn1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAP4/AAD+HwAAwAcAAIADAACAAwAAgAAAAIAAAACAAAAA4AAAAOAAAADwAAAA/gAAAP4AAAD/gwAA//8AAA==\" rel=\"icon\" type=\"image/x-icon\" />");
+                    serverGateway.print("</head>");
+                    serverGateway.println("<style>");
+                    serverGateway.println("html{font-family:\"Trebuchet MS\";text-align:center;background-color:white;color:black}");  
+                    serverGateway.println("h1{text-align:center;color:red;font-size:72px}");
+                    serverGateway.println("h2{text-align:center;color:red;font-size:36px}");
+                    serverGateway.println("p{text-align:center;font-size:36px}");
+                    serverGateway.println("table,th,td{border:2px outset black;font-size:56px}");
+                    serverGateway.println("</style>");
+                    serverGateway.println("<h1>IHM Web Passerelle</h1>");
+                    serverGateway.println("<p>ID station : ");
+                    serverGateway.print(protocol.getStationId());
+                    serverGateway.print("<br />");
+                    serverGateway.println("ID passerelle : ");
+                    serverGateway.print(protocol.getGatewayId());
+                    serverGateway.print("<br />");
+                    serverGateway.println("Timestamp : ");
+                    serverGateway.print(protocol.getTimestampMessage());
+                    serverGateway.print("<br />");
+                    serverGateway.println("Types de données : ");
+                    serverGateway.print(protocol.getDataType());
+                    serverGateway.print("<br />");
+                    serverGateway.println("Données 1 :");
+                    serverGateway.print(protocol.getDataOne());
+                    serverGateway.print("<br />");
+                    serverGateway.println("Données 2 :");
+                    serverGateway.print(protocol.getDataTwo()); 
+                    serverGateway.print("<br />");
+                    serverGateway.println("Données 3 :");
+                    serverGateway.print(protocol.getDataThree());
+                    serverGateway.print("</p>");
+                    serverGateway.print("<br /> <br /> <br /> <br />");
+                    serverGateway.print("<h2>20 dernières trames reçues :</h2>");
+                    serverGateway.print("<table style=\"width:100%\">");
+                    serverGateway.print("<tr>");
+                    serverGateway.print("<th>ID</th>");
+                    serverGateway.print("<th>IDp</th>");
+                    serverGateway.print("<th>TS</th>");
+                    serverGateway.print("<th>DT</th>");
+                    serverGateway.print("<th>D1</th>");
+                    serverGateway.print("<th>D2</th>");
+                    serverGateway.print("<th>D3</th>");
+                    serverGateway.print("</tr>");
+                    //serverGateway.print(tsarray);
+                    serverGateway.print("</table>");
+                    serverGateway.println("</html>");
                     break;
                 }
                                                              // every line of text received from the client ends with \r\n
