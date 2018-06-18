@@ -12,7 +12,16 @@ void setup() {
   SerialUSB.begin(9600);
   SerialUSB.println("LoRa Sender");
   thisLoRa.begin();
-  protocol.codeFrame(0x0B,0x00,0x0000,0x0001,0x0000,0x0000,0x0000);
+
+  char pacomeName[] = {'T', 'E', 'S', 'T', '-', 'L', 'O', 'R', 'A', '1'};
+  uint16_t datas[] = {0x0000, 0x0000, 0x0000};
+
+  transform(pacomeName, datas);
+  protocol.codeFrame(0x0B,0x00,0x0000,0x0001,datas[0],datas[1],datas[2]);
+
+  LoRa.beginPacket();
+  LoRa.write((uint8_t*)&protocol, 12);
+  LoRa.endPacket();
 }
 
 void loop()
