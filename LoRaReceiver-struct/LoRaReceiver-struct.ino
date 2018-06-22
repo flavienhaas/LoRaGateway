@@ -13,6 +13,7 @@ void setup() {
 }
 
 void loop() {
+  //SerialUSB.println("Frame received");
   int packetSize = thisLoRa.parsePacket();
   if (packetSize > 0)
   {

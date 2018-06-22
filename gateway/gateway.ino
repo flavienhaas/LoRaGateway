@@ -16,12 +16,7 @@ CProtocol12Bytes protocol;                                   // create object to
 //File webFile;                                                // variable for the file containing the webpage
 
 String postData;
-String tsarray;
-String oldpostData;
-
-//Pour comparer les timestamps
-uint16_t tstamp_old;
-uint16_t tstamp_now;
+String row;
 
 byte mac[] = {0xFA, 0xE3, 0x40, 0xEF, 0xFF, 0xFD};           // set the mac address
 //IPAddress ip(192, 1, 1, 150);                                // set the IP address for the ethernet shield, overwise the librairy use DHCP
@@ -70,8 +65,8 @@ void loop() {
     if(protocol.getTimestampMessage() == saveIDandTS[numCase])
       {}
     else{
-      tstamp_now = protocol.getTimestampMessage();
       saveIDandTS[numCase] = protocol.getTimestampMessage();
+      row += "<tr><td>" + String(protocol.getStationId())+"</td><td>"+String(protocol.getGatewayId())+"</td><td>"+String(protocol.getTimestampMessage())+"</td><td>" + String(protocol.getDataType())+"</td><td>" + String(protocol.getDataOne())+"</td><td>" + String(protocol.getDataTwo())+"</td><td>" + String(protocol.getDataThree())+"</td></tr>";
       //post to server
       EthernetClient postClient;
       postData = "ID="+String(protocol.getStationId())+"&IDp="+String(protocol.getGatewayId())+"&TS="+String(protocol.getTimestampMessage())+"&DT="+String(protocol.getDataType())+"&D1="+String(protocol.getDataOne())+"&D2="+String(protocol.getDataTwo())+"&D3="+String(protocol.getDataThree());
@@ -86,12 +81,28 @@ void loop() {
       postClient.print(postData);                              // to send the concatenated frame
       SerialUSB.println("Post to server sent");                // to display the sent frame
       SerialUSB.println(postData);
-      delay(4000);
+      delay(10);
       }
       else{
         SerialUSB.println("Post failed");
+        SerialUSB.println(" New attempt to POST");
+        if (postClient.connect("btslimayrac.ovh", 80)){
+        postClient.print("POST /weather/formulaire/formulaireCollecteLORA.php HTTP/1.1\n");
+        postClient.print("Host: btslimayrac.ovh\n");             // specifies the Internet host and port number of the resource being requested
+        postClient.print("Connection: close\n");                 // header option to signal that the connection will be closed after completion of the response
+        postClient.print("Content-Type: application/x-www-form-urlencoded\n");      // values are encoded in key-value separated by '&', with a '=' between the key and the value
+        postClient.print("Content-Length: ");                    // indicates the size of the entity-body, in decimal number of bytes
+        postClient.print(postData.length());                     // to retrieve the size and send it
+        postClient.print("\n\n");
+        postClient.print(postData);                              // to send the concatenated frame
+        SerialUSB.println("Post to server sent");                // to display the sent frame
+        SerialUSB.println(postData);
+        delay(10);
         }
-      delay(100);
+        else{
+          SerialUSB.println("Post miserably failed, can't connect to btslimayrac.ovh, check your network's settings");
+          }//end of secnd else
+        }//end of first else
       SerialUSB.println("New frame recieved : ");
       SerialUSB.print("ID = ");
       SerialUSB.print(protocol.getStationId(),HEX);
@@ -106,6 +117,8 @@ void loop() {
       SerialUSB.println(protocol.getDataTwo(),HEX);
       SerialUSB.print("D3 = ");
       SerialUSB.println(protocol.getDataThree(),HEX);
+      SerialUSB.print("You can see the web interface at :");
+      SerialUSB.println(Ethernet.localIP());
     }
   }//if (packetSize > 0)
 
@@ -127,7 +140,7 @@ void loop() {
                     serverGateway.println("<!DOCTYPE HTML>");
                     serverGateway.println("<html>");
                     serverGateway.print("<head>");
-                    serverGateway.print("<meta http-equiv=\"refresh\" content=\"30\">");
+                    serverGateway.print("<meta http-equiv=\"refresh\" content=\"15\">");
                     serverGateway.print("<meta charset=\"utf-8\" />");
                     serverGateway.print("<link href=\"data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZWZmAHV2dgKNjo4Rent7A3JzcwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADhIrAL+/wgCnqKw3zMvMvayoqD0AAAACFRMaAMwAAAAAAAAAAAAAAAAAAAAAAAAA0stPANLLTwLTzFAi08xQPNPMUD3Sy0g6ycWOiq6+tP00gorYHHV1mLO2UDfd01AL08xQAM3ITAAAAAAA0stPANLLTgLTzFBm08xQ3tPMUPTTzFD108xQ9NTKTvZfr4X+ALjJ/zypl/3IxFDw1M1QptPMTxnTzE8AAAAAANPMUADTzFAt08xQ5dPMUP/TzFD/08xQ/9PMUP/UzE//or1g/2O6m/+sx8L/zch6/9LLTv/TzFB80cxUANnNRgDTzFAA08xQTdPMUPvTzFD/08xQ/9PMUP/TzFD/08xQ/9XMTv/RyGH/zMie/8nEbf/TzE//yslZsk+l1AoqmvkK08xQANPMUCvTzFDj08xQ/9PMUP/TzFD/08xQ/9PMUP/TzFD/0stQ/9DJUP/UzE7/1MxP/8HGYogjl/w1KJj2KtLMTwDSy04C08xQYtPMUOLTzFD/08xQ/9PMUP/TzFD/08xQ/9PMUP/UzFD/yc1Z/4TPk/8tv+SjKJf8IymZ9hsAAAAA08xPANPMUgDTzFBS08xQ9dPMUP/TzFD/08xQ/9PMUP/TzFD/1cxO/27Rpf8G1vv/Bs3+8h2p+EwnlPUgAAAAAAAAAADSy1AA0stPCtPMUHPTzFCi08xQ29PMUP/TzFD/1sxO/7/NYf8r1Nz/ANf//wbO/vIZrfhEJZP2JgAAAAAAAAAAAAAAANHKTwDRyk4At6ozANPMUD7UzE+608xQ47HJbfJH0cX/A9b+/wTS/voOwfuUL5z1Jiya9RUAAAAAAAAAAAAAAAAAAAAAAAAAANLLTwA6nuIAW6jDKXiwqkg+rthcC739rgvD/LkUufpoLJ72KTKd9jkxnfYPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGpP8AB+V+hMblP0NKJf4FiuU9TAnlPUoKZf1OyeY9RonmPYSLJv2CwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI5b2ACSW9gkklvUTH5X2ASKW9h4ml/UGKJn1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAP4/AAD+HwAAwAcAAIADAACAAwAAgAAAAIAAAACAAAAA4AAAAOAAAADwAAAA/gAAAP4AAAD/gwAA//8AAA==\" rel=\"icon\" type=\"image/x-icon\" />");
                     serverGateway.print("</head>");
@@ -135,10 +148,11 @@ void loop() {
                     serverGateway.println("html{font-family:\"Trebuchet MS\";text-align:center;background-color:white;color:black}");  
                     serverGateway.println("h1{text-align:center;color:red;font-size:72px}");
                     serverGateway.println("h2{text-align:center;color:red;font-size:36px}");
-                    serverGateway.println("p{text-align:center;font-size:36px}");
-                    serverGateway.println("table,th,td{border:2px outset black;font-size:56px}");
+                    serverGateway.println("p{text-align:center;font-size:25px}");
+                    serverGateway.println("table,th,td{border:2px outset black;font-size:25px}");
                     serverGateway.println("</style>");
                     serverGateway.println("<h1>IHM Web Passerelle</h1>");
+                    serverGateway.println("<p>Dernière trame envoyée</p>");
                     serverGateway.println("<p>ID station : ");
                     serverGateway.print(protocol.getStationId());
                     serverGateway.print("<br />");
@@ -160,19 +174,19 @@ void loop() {
                     serverGateway.println("Données 3 :");
                     serverGateway.print(protocol.getDataThree());
                     serverGateway.print("</p>");
-                    serverGateway.print("<br /> <br /> <br /> <br />");
-                    serverGateway.print("<h2>20 dernières trames reçues :</h2>");
+                    serverGateway.print("<br/><br/>");
+                    serverGateway.print("<h2>Historique des dernières trames envoyées :</h2>");
                     serverGateway.print("<table style=\"width:100%\">");
                     serverGateway.print("<tr>");
-                    serverGateway.print("<th>ID</th>");
-                    serverGateway.print("<th>IDp</th>");
-                    serverGateway.print("<th>TS</th>");
-                    serverGateway.print("<th>DT</th>");
-                    serverGateway.print("<th>D1</th>");
-                    serverGateway.print("<th>D2</th>");
-                    serverGateway.print("<th>D3</th>");
+                    serverGateway.print("<th>Identifiant station</th>");
+                    serverGateway.print("<th>Identifiant passerelle</th>");
+                    serverGateway.print("<th>TimeStamp</th>");
+                    serverGateway.print("<th>Type de données</th>");
+                    serverGateway.print("<th>Donnée 1</th>");
+                    serverGateway.print("<th>Donnée 2</th>");
+                    serverGateway.print("<th>Donnée 3</th>");
                     serverGateway.print("</tr>");
-                    //serverGateway.print(tsarray);
+                    serverGateway.print(row);
                     serverGateway.print("</table>");
                     serverGateway.println("</html>");
                     break;
@@ -190,7 +204,7 @@ void loop() {
             }                                                // end if (client.available())
         }                                                    // end while (client.connected())
         delay(1);                                            // give the web browser time to receive the data
-        serverGateway.stop();                              // close the connection
+        serverGateway.stop();                                // close the connection
         break;
     }//end if (serverGateway)
 }//end void loop
